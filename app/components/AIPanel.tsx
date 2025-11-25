@@ -11,6 +11,7 @@ import {
   Loader,
 } from 'lucide-react';
 import { AIMessageFormatter } from './AIMessageFormatter';
+import { Tooltip } from './Tooltip';
 import { AIClient } from '@/lib/ai-client';
 import toast from 'react-hot-toast';
 
@@ -103,7 +104,7 @@ export const AIPanel = ({
       }, {
         conversationHistory: messages
           .filter((m) => m.role !== 'system')
-          .map((m) => ({ role: m.role, content: m.content })),
+          .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
         code,
         problemDescription,
       });
@@ -264,55 +265,22 @@ export const AIPanel = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-gray-200">
+    <div className="flex flex-col h-full w-full bg-white border-l border-[var(--border-quaternary)]">
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-        <h3 className="text-lg font-semibold text-gray-900">🤖 AI Assistant</h3>
+      <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[var(--border-quaternary)] bg-white">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+          {/* Claude Logo: 可用lucide-react的 bot icon */}
+          <Lightbulb size={20} className="text-[var(--light-blue-60)]" />
+          AI Assistant
+        </h3>
         <button
           onClick={onClose}
-          className="p-1 hover:bg-gray-200 rounded transition-colors"
+          className="p-1 hover:bg-[var(--layer-bg-gray)] rounded transition-colors"
         >
-          <X size={20} className="text-gray-600" />
+          <X size={20} className="text-[var(--text-secondary)]" />
         </button>
       </div>
 
-      {/* Quick Actions */}
-      <div className="shrink-0 px-3 py-2 border-b border-gray-200 bg-gray-50 space-y-2">
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => handleQuickAction('analyze')}
-            disabled={isLoading || !code}
-            className="flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded transition-colors"
-          >
-            <Zap size={14} />
-            分析
-          </button>
-          <button
-            onClick={() => handleQuickAction('fix')}
-            disabled={isLoading || !code}
-            className="flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-semibold text-white bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded transition-colors"
-          >
-            <Wrench size={14} />
-            修复
-          </button>
-          <button
-            onClick={() => handleQuickAction('optimize')}
-            disabled={isLoading || !code}
-            className="flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded transition-colors"
-          >
-            <Lightbulb size={14} />
-            优化
-          </button>
-        </div>
-        <button
-          onClick={handleClearMessages}
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-        >
-          <Trash2 size={14} />
-          清除对话
-        </button>
-      </div>
 
       {/* Messages Area */}
       <div
@@ -322,7 +290,7 @@ export const AIPanel = ({
         {messages.map((msg) => (
           <div key={msg.id}>
             {msg.role === 'system' ? (
-              <div className="mb-3 text-center text-sm text-gray-500">{msg.content}</div>
+              <div className="mb-3 text-center text-sm text-[var(--text-quaternary)]">{msg.content}</div>
             ) : (
               <AIMessageFormatter content={msg.content} isUser={msg.role === 'user'} />
             )}
@@ -330,7 +298,7 @@ export const AIPanel = ({
         ))}
 
         {isLoading && !currentAction && (
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
             <Loader className="animate-spin" size={16} />
             <span className="text-sm">正在思考...</span>
           </div>
@@ -340,7 +308,7 @@ export const AIPanel = ({
       </div>
 
       {/* Input Area */}
-      <div className="shrink-0 px-4 py-3 border-t border-gray-200 bg-gray-50 space-y-2">
+      <div className="shrink-0 px-4 py-3 border-t border-[var(--border-quaternary)] bg-white space-y-2">
         <div className="flex gap-2">
           <input
             type="text"
@@ -354,19 +322,67 @@ export const AIPanel = ({
             }}
             placeholder="提问或输入命令..."
             disabled={isLoading}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="flex-1 px-3 py-2 border border-[var(--border-quaternary)] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--light-blue-60)] disabled:bg-[var(--layer-bg-gray)] disabled:cursor-not-allowed"
           />
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !inputValue.trim()}
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            <Send size={18} />
-          </button>
+
+          {/* Quick Action Buttons - Icon Only */}
+          <Tooltip text="分析代码" position="bottom">
+            <button
+              onClick={() => handleQuickAction('analyze')}
+              disabled={isLoading || !code}
+              className="p-2 text-[var(--light-blue-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+            >
+              <Zap size={18} />
+            </button>
+          </Tooltip>
+
+          <Tooltip text="修复代码" position="bottom">
+            <button
+              onClick={() => handleQuickAction('fix')}
+              disabled={isLoading || !code}
+              className="p-2 text-[var(--light-brand-orange)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+            >
+              <Wrench size={18} />
+            </button>
+          </Tooltip>
+
+          <Tooltip text="优化代码" position="bottom">
+            <button
+              onClick={() => handleQuickAction('optimize')}
+              disabled={isLoading || !code}
+              className="p-2 text-[var(--light-green-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+            >
+              <Lightbulb size={18} />
+            </button>
+          </Tooltip>
+
+          {/* Send Button */}
+          <Tooltip text="发送" position="bottom">
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !inputValue.trim()}
+              className="p-2 bg-[var(--light-blue-60)] text-white rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+            >
+              <Send size={18} />
+            </button>
+          </Tooltip>
         </div>
-        <p className="text-xs text-gray-500">
-          💡 Tip: 按 Enter 发送，Shift+Enter 换行
-        </p>
+
+        {/* Tips and Clear Button */}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-[var(--text-quaternary)]">
+            💡 Tip: 按 Enter 发送，Shift+Enter 换行
+          </p>
+          <Tooltip text="清除对话" position="top">
+            <button
+              onClick={handleClearMessages}
+              disabled={isLoading}
+              className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );

@@ -112,24 +112,24 @@ console.log(solution());`;
   // Left Panel - Problem Description
   const leftPanel = (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h2 className="text-xl font-semibold text-gray-900">Problem Description</h2>
+      <div className="shrink-0 px-6 py-4 border-b border-[var(--border-quaternary)] bg-white">
+        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Problem Description</h2>
       </div>
       <div className="flex-1 overflow-auto px-6 py-4">
         <div className="space-y-4">
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Problem Title</h3>
-            <p className="text-gray-600">Add your problem description here</p>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Problem Title</h3>
+            <p className="text-[var(--text-secondary)]">Add your problem description here</p>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-            <p className="text-gray-600">This is where the problem statement goes.</p>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Description</h3>
+            <p className="text-[var(--text-secondary)]">This is where the problem statement goes.</p>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Example</h3>
-            <div className="bg-gray-50 p-3 rounded border border-gray-200">
-              <p className="text-sm text-gray-600">Input: {"example input"}</p>
-              <p className="text-sm text-gray-600">Output: {"example output"}</p>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Example</h3>
+            <div className="bg-[var(--layer-bg-gray)] p-3 rounded border border-[var(--border-quaternary)]">
+              <p className="text-sm text-[var(--text-secondary)]">Input: {"example input"}</p>
+              <p className="text-sm text-[var(--text-secondary)]">Output: {"example output"}</p>
             </div>
           </div>
         </div>
@@ -140,12 +140,12 @@ console.log(solution());`;
   // Right Top Panel - Code Editor
   const rightTopPanel = (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Code Editor</h2>
+      <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Code Editor</h2>
         <button
           onClick={handleExecuteAll}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--light-blue-60)] text-white font-semibold rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
         >
           <Play size={16} />
           {loading ? 'Running...' : 'Run'}
@@ -155,7 +155,7 @@ console.log(solution());`;
         <CodeEditor defaultCode={code} onCodeChange={handleCodeChange} language="javascript" />
       </div>
       {executionTime > 0 && (
-        <div className="shrink-0 px-4 py-2 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
+        <div className="shrink-0 px-4 py-2 bg-white border-t border-[var(--border-quaternary)] text-sm text-[var(--text-secondary)]">
           Execution Time: {executionTime}ms
         </div>
       )}
@@ -165,11 +165,11 @@ console.log(solution());`;
   // Right Bottom Panel - Test Cases
   const rightBottomPanel = (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Test Cases</h2>
+      <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Test Cases</h2>
         <button
           onClick={handleAddTestCase}
-          className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 px-3 py-1 bg-[var(--light-green-60)] text-white text-sm rounded hover:opacity-90 transition-opacity"
         >
           <Plus size={16} />
           Add
@@ -178,20 +178,20 @@ console.log(solution());`;
 
       <div className="flex-1 overflow-auto flex flex-col">
         {/* Test Cases List */}
-        <div className="shrink-0 border-b border-gray-200">
+        <div className="shrink-0 border-b border-[var(--border-quaternary)]">
           <div className="flex overflow-x-auto">
             {testCases.map((tc) => (
               <button
                 key={tc.id}
                 onClick={() => setSelectedTestCaseId(tc.id)}
                 className={`px-4 py-2 border-b-2 transition-colors whitespace-nowrap ${selectedTestCaseId === tc.id
-                  ? 'border-blue-600 text-blue-600 font-semibold'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'border-[var(--light-blue-60)] text-[var(--light-blue-60)] font-semibold'
+                  : 'border-transparent text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
                   }`}
               >
                 Case {testCases.indexOf(tc) + 1}
                 {testResults[tc.id] && (
-                  <span className={`ml-2 ${testResults[tc.id].passed ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`ml-2 ${testResults[tc.id].passed ? 'text-[var(--light-green-60)]' : 'text-[var(--light-red-60)]'}`}>
                     {testResults[tc.id].passed ? '✓' : '✗'}
                   </span>
                 )}
@@ -204,38 +204,38 @@ console.log(solution());`;
         {selectedTestCase && (
           <div className="flex-1 overflow-auto p-4 space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Input</label>
+              <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">Input</label>
               <textarea
                 value={selectedTestCase.input}
                 onChange={(e) => handleUpdateTestCase(selectedTestCase.id, 'input', e.target.value)}
-                className="w-full h-24 p-3 border border-gray-200 rounded font-mono text-sm resize-none"
+                className="w-full h-24 p-3 border border-[var(--border-quaternary)] rounded font-mono text-sm resize-none focus:outline-none focus:border-[var(--light-blue-60)]"
                 placeholder="Enter test input"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Expected Output</label>
+              <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">Expected Output</label>
               <textarea
                 value={selectedTestCase.expectedOutput}
                 onChange={(e) => handleUpdateTestCase(selectedTestCase.id, 'expectedOutput', e.target.value)}
-                className="w-full h-24 p-3 border border-gray-200 rounded font-mono text-sm resize-none"
+                className="w-full h-24 p-3 border border-[var(--border-quaternary)] rounded font-mono text-sm resize-none focus:outline-none focus:border-[var(--light-blue-60)]"
                 placeholder="Enter expected output"
               />
             </div>
 
             {/* Test Result */}
             {selectedTestResult && (
-              <div className={`p-3 rounded border-2 ${selectedTestResult.passed ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
-                <p className={`font-semibold mb-2 ${selectedTestResult.passed ? 'text-green-700' : 'text-red-700'}`}>
+              <div className={`p-3 rounded border-2 ${selectedTestResult.passed ? 'bg-[var(--green-10)] border-[var(--green-60)]' : 'bg-[var(--red-10)] border-[var(--red-60)]'}`}>
+                <p className={`font-semibold mb-2 ${selectedTestResult.passed ? 'text-[var(--green-80)]' : 'text-[var(--red-80)]'}`}>
                   {selectedTestResult.passed ? '✓ Passed' : '✗ Failed'}
                 </p>
                 {selectedTestResult.error ? (
-                  <p className="text-red-600 font-mono text-sm">{selectedTestResult.error}</p>
+                  <p className="text-[var(--red-60)] font-mono text-sm">{selectedTestResult.error}</p>
                 ) : (
                   <div className="space-y-1 text-sm">
-                    <p className="text-gray-700">
+                    <p className="text-[var(--text-secondary)]">
                       <span className="font-semibold">Expected:</span> {selectedTestCase.expectedOutput}
                     </p>
-                    <p className="text-gray-700">
+                    <p className="text-[var(--text-secondary)]">
                       <span className="font-semibold">Actual:</span> {selectedTestResult.output}
                     </p>
                   </div>
@@ -247,7 +247,7 @@ console.log(solution());`;
             {testCases.length > 1 && (
               <button
                 onClick={() => handleDeleteTestCase(selectedTestCase.id)}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[var(--red-10)] text-[var(--red-60)] rounded hover:opacity-80 transition-opacity"
               >
                 <Trash2 size={16} />
                 Delete Test Case
@@ -262,11 +262,11 @@ console.log(solution());`;
   return (
     <div className="flex flex-col h-screen w-screen bg-white">
       {/* Header */}
-      <header className="shrink-0 px-6 py-4 bg-white border-b border-gray-200 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">LeetCode with AI</h1>
+      <header className="shrink-0 px-6 py-4 bg-white border-b border-[var(--border-quaternary)] flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">LeetCode with AI</h1>
         <button
           onClick={() => setShowAIPanel(!showAIPanel)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--light-blue-60)] text-white font-semibold hover:opacity-90 transition-opacity"
         >
           <MessageCircle size={18} />
           {showAIPanel ? 'Hide' : 'Show'} AI
@@ -274,73 +274,68 @@ console.log(solution());`;
       </header>
 
       {/* Main Content with Resizable Panels */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden bg-white">
         <PanelGroup direction="horizontal" className="w-full h-full">
           {/* Left Panel - Problem Description */}
           <Panel defaultSize={35} minSize={20} maxSize={60} className="overflow-hidden">
-            <div className="w-full h-full bg-white border-r border-gray-200 overflow-auto">
+            <div className="w-full h-full bg-white border-r border-[var(--border-quaternary)] overflow-auto">
               {leftPanel}
             </div>
           </Panel>
 
-          {/* Horizontal Resize Handle */}
-          <PanelResizeHandle className="w-1 bg-gray-200 hover:bg-blue-400 transition-colors cursor-col-resize group flex items-center justify-center">
+          {/* Resize Handle - Left to Middle */}
+          <PanelResizeHandle className="w-1 bg-[var(--border-quaternary)] hover:bg-[var(--light-blue-60)] transition-colors cursor-col-resize group flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical size={16} className="text-gray-400" />
+              <GripVertical size={16} className="text-[var(--text-quaternary)]" />
             </div>
           </PanelResizeHandle>
 
-          {/* Right Panel - Code Editor + Test Cases + AI */}
-          <Panel defaultSize={65} minSize={40} maxSize={80} className="overflow-hidden">
-            <PanelGroup direction="horizontal" className="w-full h-full">
-              {/* Right Panel - Code Editor + Test Cases */}
-              <Panel defaultSize={showAIPanel ? 60 : 100} minSize={30} maxSize={100} className="overflow-hidden">
-                <PanelGroup direction="vertical" className="w-full h-full">
-                  {/* Right Top Panel - Code Editor */}
-                  <Panel defaultSize={50} minSize={30} maxSize={70} className="overflow-hidden">
-                    <div className="w-full h-full bg-white border-b border-gray-200 overflow-auto">
-                      {rightTopPanel}
-                    </div>
-                  </Panel>
-
-                  {/* Vertical Resize Handle */}
-                  <PanelResizeHandle className="h-1 bg-gray-200 hover:bg-blue-400 transition-colors cursor-row-resize group flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <GripVertical size={16} className="text-gray-400 rotate-90" />
-                    </div>
-                  </PanelResizeHandle>
-
-                  {/* Right Bottom Panel - Test Cases */}
-                  <Panel defaultSize={50} minSize={30} maxSize={70} className="overflow-hidden">
-                    <div className="w-full h-full bg-white overflow-auto">
-                      {rightBottomPanel}
-                    </div>
-                  </Panel>
-                </PanelGroup>
+          {/* Middle Panel - Code Editor + Test Cases */}
+          <Panel defaultSize={showAIPanel ? 50 : 65} minSize={30} maxSize={80} className="overflow-hidden">
+            <PanelGroup direction="vertical" className="w-full h-full">
+              {/* Top Panel - Code Editor */}
+              <Panel defaultSize={50} minSize={30} maxSize={70} className="overflow-hidden">
+                <div className="w-full h-full bg-white border-b border-[var(--border-quaternary)] overflow-auto">
+                  {rightTopPanel}
+                </div>
               </Panel>
 
-              {/* AI Panel - Horizontal Resize Handle (if visible) */}
-              {showAIPanel && (
-                <>
-                  <PanelResizeHandle className="w-1 bg-gray-200 hover:bg-blue-400 transition-colors cursor-col-resize group flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <GripVertical size={16} className="text-gray-400" />
-                    </div>
-                  </PanelResizeHandle>
+              {/* Resize Handle - Top to Bottom */}
+              <PanelResizeHandle className="h-1 bg-[var(--border-quaternary)] hover:bg-[var(--light-blue-60)] transition-colors cursor-row-resize group flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <GripVertical size={16} className="text-[var(--text-quaternary)] rotate-90" />
+                </div>
+              </PanelResizeHandle>
 
-                  {/* AI Panel */}
-                  <Panel defaultSize={40} minSize={250} maxSize={70} className="overflow-hidden">
-                    <AIPanel
-                      code={code}
-                      problemDescription=""
-                      testResults={Object.values(testResults)}
-                      onClose={() => setShowAIPanel(false)}
-                    />
-                  </Panel>
-                </>
-              )}
+              {/* Bottom Panel - Test Cases */}
+              <Panel defaultSize={50} minSize={30} maxSize={70} className="overflow-hidden">
+                <div className="w-full h-full bg-white overflow-auto">
+                  {rightBottomPanel}
+                </div>
+              </Panel>
             </PanelGroup>
           </Panel>
+
+          {/* Resize Handle - Middle to Right (AI Panel) */}
+          {showAIPanel && (
+            <PanelResizeHandle className="w-1 bg-[var(--border-quaternary)] hover:bg-[var(--light-blue-60)] transition-colors cursor-col-resize group flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <GripVertical size={16} className="text-[var(--text-quaternary)]" />
+              </div>
+            </PanelResizeHandle>
+          )}
+
+          {/* Right Panel - AI Assistant */}
+          {showAIPanel && (
+            <Panel defaultSize={20} minSize={15} className="overflow-hidden">
+              <AIPanel
+                code={code}
+                problemDescription=""
+                testResults={Object.values(testResults)}
+                onClose={() => setShowAIPanel(false)}
+              />
+            </Panel>
+          )}
         </PanelGroup>
       </main>
     </div>

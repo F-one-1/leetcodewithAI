@@ -20,7 +20,8 @@
     "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^3",
-    "react-syntax-highlighter": "^16.1.0"
+    "react-syntax-highlighter": "^16.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

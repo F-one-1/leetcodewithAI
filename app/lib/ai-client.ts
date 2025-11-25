@@ -1,6 +1,9 @@
 /**
  * AI Client - Frontend utility for communicating with AI backend APIs
  * Handles streaming responses using EventSource (SSE)
+ * 
+ * All methods now use the unified /api/ai/process endpoint internally
+ * while maintaining backward compatibility with the original API
  */
 
 interface Message {
@@ -14,30 +17,32 @@ interface StreamCallback {
   onError?: (error: string) => void;
 }
 
+interface TestResult {
+  id: string;
+  passed: boolean;
+  output: string;
+  expectedOutput: string;
+  error?: string;
+}
+
 export class AIClient {
   /**
-   * Send a chat message and stream the response
+   * Internal method to call the unified AI process endpoint
    */
-  static async chat(
-    message: string,
+  private static async callAIProcess(
+    type: 'chat' | 'analyze' | 'fix' | 'optimize',
     callbacks: StreamCallback,
-    options?: {
-      conversationHistory?: Message[];
-      code?: string;
-      problemDescription?: string;
-    }
+    payload: Record<string, any>
   ): Promise<void> {
     try {
-      const response = await fetch('/api/ai/chat', {
+      const response = await fetch('/api/ai/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message,
-          conversationHistory: options?.conversationHistory || [],
-          code: options?.code,
-          problemDescription: options?.problemDescription,
+          type,
+          ...payload,
         }),
       });
 
@@ -53,6 +58,26 @@ export class AIClient {
   }
 
   /**
+   * Send a chat message and stream the response
+   */
+  static async chat(
+    message: string,
+    callbacks: StreamCallback,
+    options?: {
+      conversationHistory?: Message[];
+      code?: string;
+      problemDescription?: string;
+    }
+  ): Promise<void> {
+    return this.callAIProcess('chat', callbacks, {
+      message,
+      conversationHistory: options?.conversationHistory || [],
+      code: options?.code,
+      problemDescription: options?.problemDescription,
+    });
+  }
+
+  /**
    * Analyze code for issues and improvements
    */
   static async analyzeCode(
@@ -60,37 +85,14 @@ export class AIClient {
     callbacks: StreamCallback,
     options?: {
       problemDescription?: string;
-      testResults?: Array<{
-        id: string;
-        passed: boolean;
-        output: string;
-        expectedOutput: string;
-        error?: string;
-      }>;
+      testResults?: TestResult[];
     }
   ): Promise<void> {
-    try {
-      const response = await fetch('/api/ai/analyze-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          problemDescription: options?.problemDescription,
-          testResults: options?.testResults,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      await this.handleStream(response, callbacks);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      callbacks.onError?.(errorMessage);
-    }
+    return this.callAIProcess('analyze', callbacks, {
+      code,
+      problemDescription: options?.problemDescription,
+      testResults: options?.testResults,
+    });
   }
 
   /**
@@ -105,29 +107,12 @@ export class AIClient {
       language?: 'javascript' | 'typescript';
     }
   ): Promise<void> {
-    try {
-      const response = await fetch('/api/ai/fix-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          issues: options?.issues || [],
-          problemDescription: options?.problemDescription,
-          language: options?.language || 'javascript',
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      await this.handleStream(response, callbacks);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      callbacks.onError?.(errorMessage);
-    }
+    return this.callAIProcess('fix', callbacks, {
+      code,
+      issues: options?.issues || [],
+      problemDescription: options?.problemDescription,
+      language: options?.language || 'javascript',
+    });
   }
 
   /**
@@ -142,29 +127,12 @@ export class AIClient {
       language?: 'javascript' | 'typescript';
     }
   ): Promise<void> {
-    try {
-      const response = await fetch('/api/ai/optimize-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          optimizationType: options?.optimizationType || 'both',
-          problemDescription: options?.problemDescription,
-          language: options?.language || 'javascript',
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      await this.handleStream(response, callbacks);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      callbacks.onError?.(errorMessage);
-    }
+    return this.callAIProcess('optimize', callbacks, {
+      code,
+      optimizationType: options?.optimizationType || 'both',
+      problemDescription: options?.problemDescription,
+      language: options?.language || 'javascript',
+    });
   }
 
   /**
