@@ -282,17 +282,17 @@ console.log(solution());`;
       />
 
       {/* Main Content with Resizable Panels */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden pr-[10px] pb-[10px] pl-[10px]">
         <PanelGroup direction="horizontal" className="w-full h-full">
           {/* Left Panel - Problem Description */}
           <Panel defaultSize={35} minSize={20} maxSize={60} className="overflow-hidden">
-            <div className="w-full h-full bg-white border-r border-[var(--border-quaternary)] overflow-auto">
+            <div className="w-full h-full bg-white border-r border-[var(--border-quaternary)] overflow-auto rounded-[8px]">
               {leftPanel}
             </div>
           </Panel>
 
           {/* Resize Handle - Left to Middle */}
-          <PanelResizeHandle className="w-1 bg-[var(--border-quaternary)] hover:bg-[var(--light-blue-60)] transition-colors cursor-col-resize group flex items-center justify-center">
+          <PanelResizeHandle className="w-1 bg-[var(--sd-background-gray)]  transition-colors cursor-col-resize group flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
               <GripVertical size={16} className="text-[var(--text-quaternary)]" />
             </div>
@@ -303,13 +303,13 @@ console.log(solution());`;
             <PanelGroup direction="vertical" className="w-full h-full">
               {/* Top Panel - Code Editor */}
               <Panel defaultSize={50} minSize={30} maxSize={70} className="overflow-hidden">
-                <div className="w-full h-full bg-white border-b border-[var(--border-quaternary)] overflow-auto">
+                <div className="w-full h-full bg-white border-b border-[var(--border-quaternary)] overflow-auto rounded-[8px]">
                   {rightTopPanel}
                 </div>
               </Panel>
 
               {/* Resize Handle - Top to Bottom */}
-              <PanelResizeHandle className="h-1 bg-[var(--border-quaternary)] hover:bg-[var(--light-blue-60)] transition-colors cursor-row-resize group flex items-center justify-center">
+              <PanelResizeHandle className="h-1 bg-[var(--sd-background-gray)]  transition-colors cursor-row-resize group flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <GripVertical size={16} className="text-[var(--text-quaternary)] rotate-90" />
                 </div>
@@ -317,7 +317,7 @@ console.log(solution());`;
 
               {/* Bottom Panel - Test Cases */}
               <Panel defaultSize={50} minSize={30} maxSize={70} className="overflow-hidden">
-                <div className="w-full h-full bg-white overflow-auto">
+                <div className="w-full h-full bg-white overflow-auto rounded-[8px]">
                   {rightBottomPanel}
                 </div>
               </Panel>
@@ -326,8 +326,8 @@ console.log(solution());`;
 
           {/* Resize Handle - Middle to Right (AI Panel) */}
           {showAIPanel && (
-            <PanelResizeHandle className="w-1 bg-[var(--border-quaternary)] hover:bg-[var(--light-blue-60)] transition-colors cursor-col-resize group flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <PanelResizeHandle className="w-1 bg-[var(--sd-background-gray)]  transition-colors cursor-col-resize group flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity ">
                 <GripVertical size={16} className="text-[var(--text-quaternary)]" />
               </div>
             </PanelResizeHandle>
@@ -335,7 +335,7 @@ console.log(solution());`;
 
           {/* Right Panel - AI Assistant */}
           {showAIPanel && (
-            <Panel defaultSize={20} minSize={15} className="overflow-hidden">
+            <Panel defaultSize={20} minSize={15} className="overflow-hidden rounded-[8px]">
               <AIPanel
                 code={code}
                 problemDescription=""

@@ -264,7 +264,7 @@ export const AIPanel = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-white border-l border-[var(--border-quaternary)]">
+    <div className="flex flex-col h-full w-full bg-white border-l border-[var(--border-quaternary)] rounded-[8px]">
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[var(--border-quaternary)] bg-white">
         <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
