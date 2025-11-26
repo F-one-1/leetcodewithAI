@@ -1,12 +1,13 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus, X } from 'lucide-react';
 import { TestCase } from './TestCasesPanel';
 
 interface TestCasesContentProps {
     testCases: TestCase[];
     selectedTestCaseId: string;
     testResults: Record<string, { output: string; passed: boolean; error?: string }>;
+    onAddTestCase: () => void;
     onDeleteTestCase: (id: string) => void;
     onUpdateTestCase: (id: string, field: 'input' | 'expectedOutput', value: string) => void;
     onSelectTestCase: (id: string) => void;
@@ -16,6 +17,7 @@ export const TestCasesContent = ({
     testCases,
     selectedTestCaseId,
     testResults,
+    onAddTestCase,
     onDeleteTestCase,
     onUpdateTestCase,
     onSelectTestCase,
@@ -27,29 +29,52 @@ export const TestCasesContent = ({
         <div className="flex-1 overflow-auto flex flex-col h-full">
             {/* Test Cases List */}
             <div className="shrink-0 border-b border-[var(--border-quaternary)]">
-                <div className="flex overflow-x-auto">
+                <div className="flex overflow-x-auto items-center gap-2 px-3 py-2">
                     {testCases.map((tc) => (
-                        <button
+                        <div
                             key={tc.id}
-                            onClick={() => onSelectTestCase(tc.id)}
-                            className={`px-4 py-2 border-b-2 transition-colors whitespace-nowrap ${selectedTestCaseId === tc.id
-                                ? 'border-[var(--light-blue-60)] text-[var(--light-blue-60)] font-semibold'
-                                : 'border-transparent text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
-                                }`}
+                            className="relative group"
                         >
-                            Case {testCases.indexOf(tc) + 1}
-                            {testResults[tc.id] && (
-                                <span
-                                    className={`ml-2 ${testResults[tc.id].passed
-                                        ? 'text-[var(--light-green-60)]'
-                                        : 'text-[var(--light-red-60)]'
-                                        }`}
+                            <button
+                                onClick={() => onSelectTestCase(tc.id)}
+                                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${selectedTestCaseId === tc.id
+                                    ? 'bg-[var(--layer-bg-gray)] text-[var(--text-primary)] font-semibold'
+                                    : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
+                                    }`}
+                            >
+                                Case {testCases.indexOf(tc) + 1}
+                                {testResults[tc.id] && (
+                                    <span
+                                        className={`ml-2 ${testResults[tc.id].passed
+                                            ? 'text-[var(--light-green-60)]'
+                                            : 'text-[var(--light-red-60)]'
+                                            }`}
+                                    >
+                                        {testResults[tc.id].passed ? '✓' : '✗'}
+                                    </span>
+                                )}
+                            </button>
+                            {testCases.length > 1 && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteTestCase(tc.id);
+                                    }}
+                                    className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full bg-[var(--text-tertiary)] hover:bg-[var(--text-primary)] text-white transition-all opacity-0 group-hover:opacity-100"
+                                    title="Delete test case"
                                 >
-                                    {testResults[tc.id].passed ? '✓' : '✗'}
-                                </span>
+                                    <X size={10} />
+                                </button>
                             )}
-                        </button>
+                        </div>
                     ))}
+                    <button
+                        onClick={onAddTestCase}
+                        className="px-3 py-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors flex items-center"
+                        title="Add test case"
+                    >
+                        <Plus size={16} />
+                    </button>
                 </div>
             </div>
 
@@ -115,17 +140,6 @@ export const TestCasesContent = ({
                                 </div>
                             )}
                         </div>
-                    )}
-
-                    {/* Delete Button */}
-                    {testCases.length > 1 && (
-                        <button
-                            onClick={() => onDeleteTestCase(selectedTestCase.id)}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[var(--red-10)] text-[var(--red-60)] rounded hover:opacity-80 transition-opacity"
-                        >
-                            <Trash2 size={16} />
-                            Delete Test Case
-                        </button>
                     )}
                 </div>
             )}

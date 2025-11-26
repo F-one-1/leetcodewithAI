@@ -57,6 +57,7 @@ export const TestCasesPanel = ({
                         testCases={testCases}
                         selectedTestCaseId={selectedTestCaseId}
                         testResults={testResults}
+                        onAddTestCase={onAddTestCase}
                         onDeleteTestCase={onDeleteTestCase}
                         onUpdateTestCase={onUpdateTestCase}
                         onSelectTestCase={onSelectTestCase}

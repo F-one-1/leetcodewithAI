@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { CodeEditor } from './components/CodeEditor';
@@ -23,16 +23,46 @@ console.log(solution());`;
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [executionTime, setExecutionTime] = useState(0);
-  const [testCases, setTestCases] = useState<TestCase[]>([
-    {
-      id: '1',
-      input: 'test input 1',
-      expectedOutput: 'Hello World',
-    },
-  ]);
-  const [selectedTestCaseId, setSelectedTestCaseId] = useState('1');
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [selectedTestCaseId, setSelectedTestCaseId] = useState('');
   const [testResults, setTestResults] = useState<Record<string, { output: string; passed: boolean; error?: string }>>({});
   const [showAIPanel, setShowAIPanel] = useState(true);
+
+  // 加载测试用例数据
+  useEffect(() => {
+    const loadTestCases = async () => {
+      try {
+        const response = await axios.get(`/api/problems/${problemId}`);
+        const problemData = response.data;
+
+        if (problemData.testCases && problemData.testCases.length > 0) {
+          // 将 JSON 格式转换为 TestCase 格式
+          const formattedTestCases: TestCase[] = problemData.testCases.map((tc: any) => ({
+            id: tc.id,
+            input: Array.isArray(tc.input) ? JSON.stringify(tc.input) : String(tc.input),
+            expectedOutput: String(tc.expectedOutput),
+          }));
+
+          setTestCases(formattedTestCases);
+          if (formattedTestCases.length > 0) {
+            setSelectedTestCaseId(formattedTestCases[0].id);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load test cases:', error);
+        // 如果加载失败，使用默认测试用例
+        const defaultTestCase: TestCase = {
+          id: '1',
+          input: '',
+          expectedOutput: '',
+        };
+        setTestCases([defaultTestCase]);
+        setSelectedTestCaseId('1');
+      }
+    };
+
+    loadTestCases();
+  }, [problemId]);
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
