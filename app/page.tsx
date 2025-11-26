@@ -5,8 +5,8 @@ import axios from 'axios';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { CodeEditor } from './components/CodeEditor';
 import { AIPanel } from './components/AIPanel';
-import { ProblemDescription } from './components/ProblemDescription';
-import { Play, Trash2, Plus, MessageCircle, X, GripVertical } from 'lucide-react';
+import { Nav } from './components/Nav';
+import { Trash2, Plus, GripVertical } from 'lucide-react';
 
 interface TestCase {
   id: string;
@@ -24,6 +24,7 @@ console.log(solution());`;
 
   const [code, setCode] = useState(defaultCode);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [executionTime, setExecutionTime] = useState(0);
   const [testCases, setTestCases] = useState<TestCase[]>([
     {
@@ -84,6 +85,19 @@ console.log(solution());`;
     }
   };
 
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      // TODO: 实现提交逻辑
+      // await submitCode(code, testResults);
+    } catch (error) {
+      // TODO: 处理提交错误
+      console.error('提交失败:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleAddTestCase = () => {
     const newId = String(Date.now());
     const newTestCase: TestCase = {
@@ -112,22 +126,37 @@ console.log(solution());`;
 
   // Left Panel - Problem Description
   const leftPanel = (
-    <ProblemDescription problemId="121-easy-Best-Time-to-Buy-and-Sell-Stock" />
+    <div className="flex flex-col h-full">
+      <div className="shrink-0 px-6 py-4 border-b border-[var(--border-quaternary)] bg-white">
+        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Problem Description</h2>
+      </div>
+      <div className="flex-1 overflow-auto px-6 py-4">
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Problem Title</h3>
+            <p className="text-[var(--text-secondary)]">Add your problem description here</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Description</h3>
+            <p className="text-[var(--text-secondary)]">This is where the problem statement goes.</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Example</h3>
+            <div className="bg-[var(--layer-bg-gray)] p-3 rounded border border-[var(--border-quaternary)]">
+              <p className="text-sm text-[var(--text-secondary)]">Input: {"example input"}</p>
+              <p className="text-sm text-[var(--text-secondary)]">Output: {"example output"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   // Right Top Panel - Code Editor
   const rightTopPanel = (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white flex items-center justify-between">
+      <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white">
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Code Editor</h2>
-        <button
-          onClick={handleExecuteAll}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--light-blue-60)] text-white font-semibold rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-        >
-          <Play size={16} />
-          {loading ? 'Running...' : 'Run'}
-        </button>
       </div>
       <div className="flex-1 overflow-hidden">
         <CodeEditor defaultCode={code} onCodeChange={handleCodeChange} language="javascript" />
@@ -238,21 +267,22 @@ console.log(solution());`;
   );
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-white">
-      {/* Header */}
-      <header className="shrink-0 px-6 py-4 bg-white border-b border-[var(--border-quaternary)] flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">LeetCode with AI</h1>
-        <button
-          onClick={() => setShowAIPanel(!showAIPanel)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--light-blue-60)] text-white font-semibold hover:opacity-90 transition-opacity"
-        >
-          <MessageCircle size={18} />
-          {showAIPanel ? 'Hide' : 'Show'} AI
-        </button>
-      </header>
+    <div
+      className="flex flex-col h-screen w-screen"
+      style={{ backgroundColor: "hsl(var(--sd-background-gray))" }}
+    >
+      {/* Header/Nav */}
+      <Nav
+        onRun={handleExecuteAll}
+        loading={loading}
+        onSubmit={handleSubmit}
+        submitting={submitting}
+        showAIPanel={showAIPanel}
+        onToggleAIPanel={() => setShowAIPanel(!showAIPanel)}
+      />
 
       {/* Main Content with Resizable Panels */}
-      <main className="flex-1 overflow-hidden bg-white">
+      <main className="flex-1 overflow-hidden">
         <PanelGroup direction="horizontal" className="w-full h-full">
           {/* Left Panel - Problem Description */}
           <Panel defaultSize={35} minSize={20} maxSize={60} className="overflow-hidden">

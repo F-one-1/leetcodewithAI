@@ -9,8 +9,8 @@ interface CodeEditorProps {
   language?: 'javascript' | 'typescript';
 }
 
-export const CodeEditor = ({ 
-  defaultCode = '// Write your code here\nfunction solution() {\n  \n}\n\nconsole.log(solution());', 
+export const CodeEditor = ({
+  defaultCode = '// Write your code here\nfunction solution() {\n  \n}\n\nconsole.log(solution());',
   onCodeChange,
   language = 'javascript'
 }: CodeEditorProps) => {
@@ -24,7 +24,7 @@ export const CodeEditor = ({
   };
 
   return (
-    <div className="w-full h-full border border-[var(--border-quaternary)] rounded-lg overflow-hidden">
+    <div className="w-full h-full border border-gray-300 rounded-lg overflow-hidden">
       <Editor
         height="100%"
         defaultLanguage={language}

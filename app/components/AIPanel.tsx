@@ -11,7 +11,6 @@ import {
   Loader,
 } from 'lucide-react';
 import { AIMessageFormatter } from './AIMessageFormatter';
-import { Tooltip } from './Tooltip';
 import { AIClient } from '@/lib/ai-client';
 import toast from 'react-hot-toast';
 
@@ -326,46 +325,39 @@ export const AIPanel = ({
           />
 
           {/* Quick Action Buttons - Icon Only */}
-          <Tooltip text="分析代码" position="bottom">
-            <button
-              onClick={() => handleQuickAction('analyze')}
-              disabled={isLoading || !code}
-              className="p-2 text-[var(--light-blue-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-            >
-              <Zap size={18} />
-            </button>
-          </Tooltip>
-
-          <Tooltip text="修复代码" position="bottom">
-            <button
-              onClick={() => handleQuickAction('fix')}
-              disabled={isLoading || !code}
-              className="p-2 text-[var(--light-brand-orange)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-            >
-              <Wrench size={18} />
-            </button>
-          </Tooltip>
-
-          <Tooltip text="优化代码" position="bottom">
-            <button
-              onClick={() => handleQuickAction('optimize')}
-              disabled={isLoading || !code}
-              className="p-2 text-[var(--light-green-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-            >
-              <Lightbulb size={18} />
-            </button>
-          </Tooltip>
+          <button
+            onClick={() => handleQuickAction('analyze')}
+            disabled={isLoading || !code}
+            title="分析代码"
+            className="p-2 text-[var(--light-blue-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+          >
+            <Zap size={18} />
+          </button>
+          <button
+            onClick={() => handleQuickAction('fix')}
+            disabled={isLoading || !code}
+            title="修复代码"
+            className="p-2 text-[var(--light-brand-orange)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+          >
+            <Wrench size={18} />
+          </button>
+          <button
+            onClick={() => handleQuickAction('optimize')}
+            disabled={isLoading || !code}
+            title="优化代码"
+            className="p-2 text-[var(--light-green-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+          >
+            <Lightbulb size={18} />
+          </button>
 
           {/* Send Button */}
-          <Tooltip text="发送" position="bottom">
-            <button
-              onClick={handleSendMessage}
-              disabled={isLoading || !inputValue.trim()}
-              className="p-2 bg-[var(--light-blue-60)] text-white rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-            >
-              <Send size={18} />
-            </button>
-          </Tooltip>
+          <button
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputValue.trim()}
+            className="p-2 bg-[var(--light-blue-60)] text-white rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+          >
+            <Send size={18} />
+          </button>
         </div>
 
         {/* Tips and Clear Button */}
@@ -373,15 +365,14 @@ export const AIPanel = ({
           <p className="text-xs text-[var(--text-quaternary)]">
             💡 Tip: 按 Enter 发送，Shift+Enter 换行
           </p>
-          <Tooltip text="清除对话" position="top">
-            <button
-              onClick={handleClearMessages}
-              disabled={isLoading}
-              className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-            >
-              <Trash2 size={16} />
-            </button>
-          </Tooltip>
+          <button
+            onClick={handleClearMessages}
+            disabled={isLoading}
+            title="清除对话"
+            className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+          >
+            <Trash2 size={16} />
+          </button>
         </div>
       </div>
     </div>
