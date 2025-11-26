@@ -21,6 +21,8 @@ interface TestCasesPanelProps {
     onSelectTestCase: (id: string) => void;
     activeTab?: string;
     onTabChange?: (value: string) => void;
+    isSubmitMode?: boolean;
+    allTestCases?: TestCase[];
 }
 
 export const TestCasesPanel = ({
@@ -33,6 +35,8 @@ export const TestCasesPanel = ({
     onSelectTestCase,
     activeTab,
     onTabChange,
+    isSubmitMode = false,
+    allTestCases = [],
 }: TestCasesPanelProps) => {
     return (
         <div className="flex flex-col h-full">
@@ -81,6 +85,8 @@ export const TestCasesPanel = ({
                         onDeleteTestCase={onDeleteTestCase}
                         onUpdateTestCase={onUpdateTestCase}
                         onSelectTestCase={onSelectTestCase}
+                        isSubmitMode={isSubmitMode}
+                        allTestCases={allTestCases}
                     />
                 </TabsContent>
             </Tabs>

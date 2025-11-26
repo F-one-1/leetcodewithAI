@@ -24,6 +24,8 @@ console.log(solution());`;
   const [submitting, setSubmitting] = useState(false);
   const [executionTime, setExecutionTime] = useState(0);
   const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [allTestCases, setAllTestCases] = useState<TestCase[]>([]); // 存储所有测试用例（用于提交）
+  const [isSubmitMode, setIsSubmitMode] = useState(false); // 标记是否为提交模式
   const [selectedTestCaseId, setSelectedTestCaseId] = useState('');
   const [testResults, setTestResults] = useState<Record<string, { output: string; passed: boolean; error?: string }>>({});
   const [showAIPanel, setShowAIPanel] = useState(true);
@@ -72,6 +74,8 @@ console.log(solution());`;
   const handleExecuteAll = async () => {
     setLoading(true);
     setTestResults({});
+    setAllTestCases([]); // 清除所有测试用例，只显示当前测试用例
+    setIsSubmitMode(false); // 设置为运行模式
 
     try {
       const results: Record<string, { output: string; passed: boolean; error?: string }> = {};
@@ -159,12 +163,77 @@ console.log(solution());`;
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setTestResults({});
+
     try {
-      // TODO: 实现提交逻辑
-      // await submitCode(code, testResults);
+      // 加载所有测试用例
+      const response = await axios.get(`/api/problems/${problemId}?all=true`);
+      const problemData = response.data;
+
+      if (!problemData.testCases || problemData.testCases.length === 0) {
+        console.error('No test cases found');
+        return;
+      }
+
+      // 将测试用例转换为 API 格式
+      const apiTestCases = problemData.testCases.map((tc: any) => ({
+        input: tc.input,
+        expectedOutput: tc.expectedOutput,
+      }));
+
+      // 执行所有测试用例
+      const executeResponse = await axios.post('/api/execute', {
+        code,
+        testCases: apiTestCases,
+      });
+
+      const { success, testResults: apiTestResults, error: execError } = executeResponse.data;
+      const results: Record<string, { output: string; passed: boolean; error?: string }> = {};
+
+      if (success && apiTestResults && apiTestResults.length > 0) {
+        // 将 API 返回的结果映射到 testResults
+        problemData.testCases.forEach((tc: any, index: number) => {
+          if (apiTestResults[index]) {
+            results[tc.id] = {
+              output: apiTestResults[index].output || '',
+              passed: apiTestResults[index].passed || false,
+              error: apiTestResults[index].error,
+            };
+          }
+        });
+      } else {
+        // 如果执行失败，标记所有测试用例为失败
+        problemData.testCases.forEach((tc: any) => {
+          results[tc.id] = {
+            output: '',
+            passed: false,
+            error: execError || 'Execution failed',
+          };
+        });
+      }
+
+      // 将 testAllCases 转换为 TestCase 格式并存储（仅用于统计）
+      const formattedAllTestCases: TestCase[] = problemData.testCases.map((tc: any) => ({
+        id: tc.id,
+        input: Array.isArray(tc.input) ? JSON.stringify(tc.input) : String(tc.input),
+        expectedOutput: String(tc.expectedOutput),
+      }));
+      setAllTestCases(formattedAllTestCases);
+      setIsSubmitMode(true); // 设置为提交模式
+
+      setTestResults(results);
+      // 切换到测试结果标签页
+      setActiveTestTab('test-results');
     } catch (error) {
-      // TODO: 处理提交错误
       console.error('提交失败:', error);
+      // 如果加载或执行失败，显示错误
+      setTestResults({
+        'error': {
+          output: '',
+          passed: false,
+          error: error instanceof Error ? error.message : 'Failed to submit',
+        }
+      });
     } finally {
       setSubmitting(false);
     }
@@ -218,6 +287,8 @@ console.log(solution());`;
       onSelectTestCase={setSelectedTestCaseId}
       activeTab={activeTestTab}
       onTabChange={setActiveTestTab}
+      isSubmitMode={isSubmitMode}
+      allTestCases={allTestCases}
     />
   );
 

@@ -1,0 +1,140 @@
+[
+    {
+        "id": "1",
+        "input": [
+            7,
+            1,
+            5,
+            3,
+            6,
+            4
+        ],
+        "expectedOutput": 5,
+        "description": "在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5"
+    },
+    {
+        "id": "2",
+        "input": [
+            7,
+            6,
+            4,
+            3,
+            1
+        ],
+        "expectedOutput": 0,
+        "description": "在这种情况下, 没有交易完成, 所以最大利润为 0"
+    },
+    {
+        "id": "3",
+        "input": [
+            1,
+            2
+        ],
+        "expectedOutput": 1,
+        "description": "最小数组，价格上涨"
+    },
+    {
+        "id": "4",
+        "input": [
+            2,
+            1
+        ],
+        "expectedOutput": 0,
+        "description": "最小数组，价格下跌"
+    },
+    {
+        "id": "5",
+        "input": [
+            1
+        ],
+        "expectedOutput": 0,
+        "description": "单元素数组，无法交易"
+    },
+    {
+        "id": "6",
+        "input": [
+            3,
+            3,
+            5,
+            0,
+            0,
+            3,
+            1,
+            4
+        ],
+        "expectedOutput": 4,
+        "description": "价格波动，最大利润在最后"
+    },
+    {
+        "id": "7",
+        "input": [
+            1,
+            2,
+            3,
+            4,
+            5
+        ],
+        "expectedOutput": 4,
+        "description": "价格一直上涨，最大利润在最后"
+    },
+    {
+        "id": "8",
+        "input": [
+            5,
+            4,
+            3,
+            2,
+            1
+        ],
+        "expectedOutput": 0,
+        "description": "价格一直下跌，无法盈利"
+    },
+    {
+        "id": "9",
+        "input": [
+            2,
+            4,
+            1
+        ],
+        "expectedOutput": 2,
+        "description": "先涨后跌，最大利润在中间"
+    },
+    {
+        "id": "10",
+        "input": [
+            3,
+            2,
+            6,
+            5,
+            0,
+            3
+        ],
+        "expectedOutput": 4,
+        "description": "复杂波动情况"
+    },
+    {
+        "id": "11",
+        "input": [
+            1,
+            3,
+            2,
+            8,
+            4,
+            9
+        ],
+        "expectedOutput": 8,
+        "description": "多次波动，最大利润较大"
+    },
+    {
+        "id": "12",
+        "input": [
+            2,
+            1,
+            2,
+            0,
+            1
+        ],
+        "expectedOutput": 1,
+        "description": "包含0价格的边界情况"
+    }
+]

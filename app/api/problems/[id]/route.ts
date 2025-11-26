@@ -42,7 +42,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         const problemDir = path.join(process.cwd(), 'app/data', problemId);
         const contentPath = path.join(problemDir, 'content.txt');
         const codeExamplePath = path.join(problemDir, 'codeExample.txt');
-        const testCasesPath = path.join(problemDir, 'testCases.json');
+
+        // 检查是否请求所有测试用例
+        const { searchParams } = new URL(request.url);
+        const allCases = searchParams.get('all') === 'true';
+        const testCasesPath = path.join(problemDir, allCases ? 'testAllCases.json' : 'testCases.json');
 
         // 检查文件是否存在
         if (!fs.existsSync(contentPath)) {
