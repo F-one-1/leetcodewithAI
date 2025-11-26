@@ -63,6 +63,13 @@ export const CodeEditor = ({
     }
   };
 
+  const handleEditorDidMount = (editorInstance: any, monaco: any) => {
+    // 禁用 Ctrl+S (或 Cmd+S on Mac) 的默认保存行为
+    editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      // 什么都不做，阻止默认的保存行为
+    });
+  };
+
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -78,6 +85,7 @@ export const CodeEditor = ({
         defaultLanguage={language}
         value={code}
         onChange={handleEditorChange}
+        onMount={handleEditorDidMount}
         theme="vs-light"
         options={{
           minimap: { enabled: false },
