@@ -83,7 +83,7 @@ export const TestCasesContent = ({
                 <div className="flex-1 overflow-auto p-4 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            Input
+                            输入
                         </label>
                         <textarea
                             value={selectedTestCase.input}
@@ -96,7 +96,7 @@ export const TestCasesContent = ({
                     </div>
                     <div>
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            Expected Output
+                            预期结果
                         </label>
                         <textarea
                             value={selectedTestCase.expectedOutput}
