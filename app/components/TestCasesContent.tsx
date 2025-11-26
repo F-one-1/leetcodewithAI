@@ -23,7 +23,6 @@ export const TestCasesContent = ({
     onSelectTestCase,
 }: TestCasesContentProps) => {
     const selectedTestCase = testCases.find((tc) => tc.id === selectedTestCaseId);
-    const selectedTestResult = selectedTestCaseId ? testResults[selectedTestCaseId] : null;
 
     return (
         <div className="flex-1 overflow-auto flex flex-col h-full">
@@ -43,16 +42,6 @@ export const TestCasesContent = ({
                                     }`}
                             >
                                 Case {testCases.indexOf(tc) + 1}
-                                {testResults[tc.id] && (
-                                    <span
-                                        className={`ml-2 ${testResults[tc.id].passed
-                                            ? 'text-[var(--light-green-60)]'
-                                            : 'text-[var(--light-red-60)]'
-                                            }`}
-                                    >
-                                        {testResults[tc.id].passed ? '✓' : '✗'}
-                                    </span>
-                                )}
                             </button>
                             {testCases.length > 1 && (
                                 <button
@@ -107,40 +96,6 @@ export const TestCasesContent = ({
                             placeholder="Enter expected output"
                         />
                     </div>
-
-                    {/* Test Result */}
-                    {selectedTestResult && (
-                        <div
-                            className={`p-3 rounded border-2 ${selectedTestResult.passed
-                                ? 'bg-[var(--green-10)] border-[var(--green-60)]'
-                                : 'bg-[var(--red-10)] border-[var(--red-60)]'
-                                }`}
-                        >
-                            <p
-                                className={`font-semibold mb-2 ${selectedTestResult.passed
-                                    ? 'text-[var(--green-80)]'
-                                    : 'text-[var(--red-80)]'
-                                    }`}
-                            >
-                                {selectedTestResult.passed ? '✓ Passed' : '✗ Failed'}
-                            </p>
-                            {selectedTestResult.error ? (
-                                <p className="text-[var(--red-60)] font-mono text-sm">
-                                    {selectedTestResult.error}
-                                </p>
-                            ) : (
-                                <div className="space-y-1 text-sm">
-                                    <p className="text-[var(--text-secondary)]">
-                                        <span className="font-semibold">Expected:</span>{' '}
-                                        {selectedTestCase.expectedOutput}
-                                    </p>
-                                    <p className="text-[var(--text-secondary)]">
-                                        <span className="font-semibold">Actual:</span> {selectedTestResult.output}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </div>
             )}
         </div>

@@ -19,6 +19,8 @@ interface TestCasesPanelProps {
     onDeleteTestCase: (id: string) => void;
     onUpdateTestCase: (id: string, field: 'input' | 'expectedOutput', value: string) => void;
     onSelectTestCase: (id: string) => void;
+    activeTab?: string;
+    onTabChange?: (value: string) => void;
 }
 
 export const TestCasesPanel = ({
@@ -29,10 +31,16 @@ export const TestCasesPanel = ({
     onDeleteTestCase,
     onUpdateTestCase,
     onSelectTestCase,
+    activeTab,
+    onTabChange,
 }: TestCasesPanelProps) => {
     return (
         <div className="flex flex-col h-full">
-            <Tabs defaultValue="test-cases" className="flex flex-col h-full">
+            <Tabs
+                value={activeTab || "test-cases"}
+                onValueChange={onTabChange}
+                className="flex flex-col h-full"
+            >
                 <div className="shrink-0 px-3 py-1 border-b border-[var(--border-quaternary)] bg-white">
                     <TabsList className="w-full justify-start bg-transparent h-auto p-0 gap-4">
                         <TabsTrigger
@@ -67,7 +75,12 @@ export const TestCasesPanel = ({
                 <TabsContent value="test-results" className="flex-1 flex flex-col m-0 mt-0 overflow-hidden">
                     <TestResultsContent
                         testCases={testCases}
+                        selectedTestCaseId={selectedTestCaseId}
                         testResults={testResults}
+                        onAddTestCase={onAddTestCase}
+                        onDeleteTestCase={onDeleteTestCase}
+                        onUpdateTestCase={onUpdateTestCase}
+                        onSelectTestCase={onSelectTestCase}
                     />
                 </TabsContent>
             </Tabs>

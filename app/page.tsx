@@ -27,6 +27,7 @@ console.log(solution());`;
   const [selectedTestCaseId, setSelectedTestCaseId] = useState('');
   const [testResults, setTestResults] = useState<Record<string, { output: string; passed: boolean; error?: string }>>({});
   const [showAIPanel, setShowAIPanel] = useState(true);
+  const [activeTestTab, setActiveTestTab] = useState('test-cases');
 
   // 加载测试用例数据
   useEffect(() => {
@@ -75,38 +76,82 @@ console.log(solution());`;
     try {
       const results: Record<string, { output: string; passed: boolean; error?: string }> = {};
 
-      for (const testCase of testCases) {
+      // Parse test cases for API
+      const apiTestCases = testCases.map((tc) => {
+        let input: any;
         try {
-          const response = await axios.post('/api/execute', {
-            code,
-          });
-
-          const { success, output: execOutput, error: execError, executionTime: time } = response.data;
-          setExecutionTime(time);
-
-          if (success) {
-            const passed = execOutput.trim() === testCase.expectedOutput.trim();
-            results[testCase.id] = {
-              output: execOutput,
-              passed,
-            };
+          // Try to parse input as JSON if it's a string
+          if (typeof tc.input === 'string' && tc.input.trim()) {
+            input = JSON.parse(tc.input);
           } else {
-            results[testCase.id] = {
+            input = tc.input;
+          }
+        } catch {
+          input = tc.input;
+        }
+
+        return {
+          input,
+          expectedOutput: tc.expectedOutput,
+        };
+      });
+
+      // Call API once with all test cases
+      try {
+        const response = await axios.post('/api/execute', {
+          code,
+          testCases: apiTestCases,
+        });
+
+        const { success, output: execOutput, error: execError, executionTime: time, testResults: apiTestResults } = response.data;
+        setExecutionTime(time);
+
+        if (success) {
+          // If API returned test results, use them
+          if (apiTestResults && apiTestResults.length > 0) {
+            testCases.forEach((tc, index) => {
+              if (apiTestResults[index]) {
+                results[tc.id] = {
+                  output: apiTestResults[index].output || '',
+                  passed: apiTestResults[index].passed || false,
+                  error: apiTestResults[index].error,
+                };
+              }
+            });
+          } else {
+            // Fallback: compare output with expected output
+            testCases.forEach((tc) => {
+              const passed = execOutput.trim() === tc.expectedOutput.trim();
+              results[tc.id] = {
+                output: execOutput,
+                passed,
+              };
+            });
+          }
+        } else {
+          // If execution failed, mark all test cases as failed
+          testCases.forEach((tc) => {
+            results[tc.id] = {
               output: '',
               passed: false,
               error: execError,
             };
-          }
-        } catch (err) {
-          results[testCase.id] = {
+          });
+        }
+      } catch (err) {
+        // If API call failed, mark all test cases as failed
+        testCases.forEach((tc) => {
+          results[tc.id] = {
             output: '',
             passed: false,
             error: err instanceof Error ? err.message : 'Failed to execute',
           };
-        }
+        });
       }
 
       setTestResults(results);
+      // 切换到测试结果标签页
+      setActiveTestTab('test-results');
     } finally {
       setLoading(false);
     }
@@ -171,6 +216,8 @@ console.log(solution());`;
       onDeleteTestCase={handleDeleteTestCase}
       onUpdateTestCase={handleUpdateTestCase}
       onSelectTestCase={setSelectedTestCaseId}
+      activeTab={activeTestTab}
+      onTabChange={setActiveTestTab}
     />
   );
 
