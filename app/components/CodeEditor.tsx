@@ -1,20 +1,60 @@
 'use client';
 
 import Editor from '@monaco-editor/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface CodeEditorProps {
   defaultCode?: string;
   onCodeChange?: (code: string) => void;
   language?: 'javascript' | 'typescript';
+  problemId?: string;
 }
 
 export const CodeEditor = ({
-  defaultCode = '// Write your code here\nfunction solution() {\n  \n}\n\nconsole.log(solution());',
+  defaultCode,
   onCodeChange,
-  language = 'javascript'
+  language = 'javascript',
+  problemId
 }: CodeEditorProps) => {
-  const [code, setCode] = useState(defaultCode);
+  const [code, setCode] = useState(defaultCode || '// Write your code here\nfunction solution() {\n  \n}\n\nconsole.log(solution());');
+  const [loading, setLoading] = useState(false);
+
+  // 加载代码模板
+  useEffect(() => {
+    const loadCodeTemplate = async () => {
+      if (!problemId) {
+        // 如果没有 problemId，使用 defaultCode 或默认模板
+        if (defaultCode) {
+          setCode(defaultCode);
+        }
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/problems/${problemId}`);
+        const codeExample = response.data.codeExample;
+
+        if (codeExample) {
+          setCode(codeExample);
+          onCodeChange?.(codeExample);
+        } else if (defaultCode) {
+          setCode(defaultCode);
+        }
+      } catch (error) {
+        console.error('Failed to load code template:', error);
+        // 如果加载失败，使用 defaultCode 或默认模板
+        if (defaultCode) {
+          setCode(defaultCode);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCodeTemplate();
+  }, [problemId]); // 只在 problemId 变化时重新加载
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -23,12 +63,20 @@ export const CodeEditor = ({
     }
   };
 
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="text-[var(--text-secondary)]">Loading code template...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-full border border-gray-300 rounded-lg overflow-hidden">
+    <div className="w-full h-full  rounded-lg overflow-hidden">
       <Editor
         height="100%"
         defaultLanguage={language}
-        defaultValue={code}
+        value={code}
         onChange={handleEditorChange}
         theme="vs-light"
         options={{

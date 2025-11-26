@@ -6,7 +6,8 @@ import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { CodeEditor } from './components/CodeEditor';
 import { AIPanel } from './components/AIPanel';
 import { Nav } from './components/Nav';
-import { Trash2, Plus, GripVertical } from 'lucide-react';
+import { ProblemDescription } from './components/ProblemDescription';
+import { Trash2, Plus, GripVertical, Code } from 'lucide-react';
 
 interface TestCase {
   id: string;
@@ -22,6 +23,7 @@ function solution() {
 
 console.log(solution());`;
 
+  const [problemId] = useState('121-easy-Best-Time-to-Buy-and-Sell-Stock');
   const [code, setCode] = useState(defaultCode);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -124,48 +126,16 @@ console.log(solution());`;
   const selectedTestCase = testCases.find((tc) => tc.id === selectedTestCaseId);
   const selectedTestResult = selectedTestCaseId ? testResults[selectedTestCaseId] : null;
 
-  // Left Panel - Problem Description
-  const leftPanel = (
-    <div className="flex flex-col h-full">
-      <div className="shrink-0 px-6 py-4 border-b border-[var(--border-quaternary)] bg-white">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Problem Description</h2>
-      </div>
-      <div className="flex-1 overflow-auto px-6 py-4">
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Problem Title</h3>
-            <p className="text-[var(--text-secondary)]">Add your problem description here</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Description</h3>
-            <p className="text-[var(--text-secondary)]">This is where the problem statement goes.</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Example</h3>
-            <div className="bg-[var(--layer-bg-gray)] p-3 rounded border border-[var(--border-quaternary)]">
-              <p className="text-sm text-[var(--text-secondary)]">Input: {"example input"}</p>
-              <p className="text-sm text-[var(--text-secondary)]">Output: {"example output"}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   // Right Top Panel - Code Editor
   const rightTopPanel = (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Code Editor</h2>
+      <div className="shrink-0 px-4 py-1 border-b border-[var(--border-quaternary)] bg-white flex items-center gap-2">
+        <Code className="w-5 h-5 text-[var(--text-primary)]" />
+        <div className="text-base text-[var(--text-primary)]">代码</div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <CodeEditor defaultCode={code} onCodeChange={handleCodeChange} language="javascript" />
+        <CodeEditor problemId={problemId} onCodeChange={handleCodeChange} language="javascript" />
       </div>
-      {executionTime > 0 && (
-        <div className="shrink-0 px-4 py-2 bg-white border-t border-[var(--border-quaternary)] text-sm text-[var(--text-secondary)]">
-          Execution Time: {executionTime}ms
-        </div>
-      )}
     </div>
   );
 
@@ -173,7 +143,7 @@ console.log(solution());`;
   const rightBottomPanel = (
     <div className="flex flex-col h-full">
       <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Test Cases</h2>
+        <div className="text-base text-[var(--text-primary)]">测试用例</div>
         <button
           onClick={handleAddTestCase}
           className="flex items-center gap-2 px-3 py-1 bg-[var(--light-green-60)] text-white text-sm rounded hover:opacity-90 transition-opacity"
@@ -287,7 +257,7 @@ console.log(solution());`;
           {/* Left Panel - Problem Description */}
           <Panel defaultSize={35} minSize={20} maxSize={60} className="overflow-hidden">
             <div className="w-full h-full bg-white border-r border-[var(--border-quaternary)] overflow-auto rounded-[8px]">
-              {leftPanel}
+              <ProblemDescription />
             </div>
           </Panel>
 

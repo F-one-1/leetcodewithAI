@@ -51,6 +51,14 @@ body {
 }
 
 :root {
+  --text-primary: #171717;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --text-quaternary: #cccccc;
+  --text-quinary: #f2f2f2;
+  --text-senary: #f5f5f5;
+  --text-septenary: #f8f8f8;
+  --text-octonary: #fbfbfb;
   --sd-background-gray: 0 0% 94.1%;
   --light-brand-gray: #b3b3b3;
   --light-brand-orange: #ffa116;

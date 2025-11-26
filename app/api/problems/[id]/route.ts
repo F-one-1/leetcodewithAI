@@ -7,6 +7,7 @@ export interface ProblemData {
   title: string;
   difficulty: string;
   content: string;
+  codeExample?: string;
 }
 
 /**
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const problemId = id;
     const problemDir = path.join(process.cwd(), 'app/data', problemId);
     const contentPath = path.join(problemDir, 'content.txt');
+    const codeExamplePath = path.join(problemDir, 'codeExample.txt');
 
     // 检查文件是否存在
     if (!fs.existsSync(contentPath)) {
@@ -42,6 +44,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // 读取内容
     const content = fs.readFileSync(contentPath, 'utf-8');
+    
+    // 读取代码模板（如果存在）
+    let codeExample: string | undefined;
+    if (fs.existsSync(codeExamplePath)) {
+      codeExample = fs.readFileSync(codeExamplePath, 'utf-8');
+    }
 
     // 解析题目信息
     const parsedInfo = parseProblemId(problemId);
@@ -54,6 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       title: `${parsedInfo.number}. ${parsedInfo.title}`,
       difficulty: parsedInfo.difficulty.charAt(0).toUpperCase() + parsedInfo.difficulty.slice(1),
       content,
+      codeExample,
     };
 
     return NextResponse.json(problemData);
