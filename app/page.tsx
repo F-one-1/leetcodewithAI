@@ -5,6 +5,7 @@ import axios from 'axios';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { CodeEditor } from './components/CodeEditor';
 import { AIPanel } from './components/AIPanel';
+import { ProblemDescription } from './components/ProblemDescription';
 import { Play, Trash2, Plus, MessageCircle, X, GripVertical } from 'lucide-react';
 
 interface TestCase {
@@ -111,30 +112,7 @@ console.log(solution());`;
 
   // Left Panel - Problem Description
   const leftPanel = (
-    <div className="flex flex-col h-full">
-      <div className="shrink-0 px-6 py-4 border-b border-[var(--border-quaternary)] bg-white">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Problem Description</h2>
-      </div>
-      <div className="flex-1 overflow-auto px-6 py-4">
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Problem Title</h3>
-            <p className="text-[var(--text-secondary)]">Add your problem description here</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Description</h3>
-            <p className="text-[var(--text-secondary)]">This is where the problem statement goes.</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Example</h3>
-            <div className="bg-[var(--layer-bg-gray)] p-3 rounded border border-[var(--border-quaternary)]">
-              <p className="text-sm text-[var(--text-secondary)]">Input: {"example input"}</p>
-              <p className="text-sm text-[var(--text-secondary)]">Output: {"example output"}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ProblemDescription problemId="121-easy-Best-Time-to-Buy-and-Sell-Stock" />
   );
 
   // Right Top Panel - Code Editor
