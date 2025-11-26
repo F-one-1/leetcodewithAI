@@ -51,6 +51,7 @@ body {
 }
 
 :root {
+  --sd-green-500: 133 98% 35%;
   --text-primary: #171717;
   --text-secondary: #666666;
   --text-tertiary: #999999;

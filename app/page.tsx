@@ -7,13 +7,8 @@ import { CodeEditor } from './components/CodeEditor';
 import { AIPanel } from './components/AIPanel';
 import { Nav } from './components/Nav';
 import { ProblemDescription } from './components/ProblemDescription';
-import { Trash2, Plus, GripVertical, Code } from 'lucide-react';
-
-interface TestCase {
-  id: string;
-  input: string;
-  expectedOutput: string;
-}
+import { TestCasesPanel, type TestCase } from './components/TestCasesPanel';
+import { GripVertical, Code } from 'lucide-react';
 
 export default function Home() {
   const defaultCode = `// Write your code here
@@ -123,9 +118,6 @@ console.log(solution());`;
     setTestCases(testCases.map((tc) => (tc.id === id ? { ...tc, [field]: value } : tc)));
   };
 
-  const selectedTestCase = testCases.find((tc) => tc.id === selectedTestCaseId);
-  const selectedTestResult = selectedTestCaseId ? testResults[selectedTestCaseId] : null;
-
   // Right Top Panel - Code Editor
   const rightTopPanel = (
     <div className="flex flex-col h-full">
@@ -141,99 +133,15 @@ console.log(solution());`;
 
   // Right Bottom Panel - Test Cases
   const rightBottomPanel = (
-    <div className="flex flex-col h-full">
-      <div className="shrink-0 px-4 py-3 border-b border-[var(--border-quaternary)] bg-white flex items-center justify-between">
-        <div className="text-base text-[var(--text-primary)]">测试用例</div>
-        <button
-          onClick={handleAddTestCase}
-          className="flex items-center gap-2 px-3 py-1 bg-[var(--light-green-60)] text-white text-sm rounded hover:opacity-90 transition-opacity"
-        >
-          <Plus size={16} />
-          Add
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-auto flex flex-col">
-        {/* Test Cases List */}
-        <div className="shrink-0 border-b border-[var(--border-quaternary)]">
-          <div className="flex overflow-x-auto">
-            {testCases.map((tc) => (
-              <button
-                key={tc.id}
-                onClick={() => setSelectedTestCaseId(tc.id)}
-                className={`px-4 py-2 border-b-2 transition-colors whitespace-nowrap ${selectedTestCaseId === tc.id
-                  ? 'border-[var(--light-blue-60)] text-[var(--light-blue-60)] font-semibold'
-                  : 'border-transparent text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
-                  }`}
-              >
-                Case {testCases.indexOf(tc) + 1}
-                {testResults[tc.id] && (
-                  <span className={`ml-2 ${testResults[tc.id].passed ? 'text-[var(--light-green-60)]' : 'text-[var(--light-red-60)]'}`}>
-                    {testResults[tc.id].passed ? '✓' : '✗'}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Test Case Editor */}
-        {selectedTestCase && (
-          <div className="flex-1 overflow-auto p-4 space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">Input</label>
-              <textarea
-                value={selectedTestCase.input}
-                onChange={(e) => handleUpdateTestCase(selectedTestCase.id, 'input', e.target.value)}
-                className="w-full h-24 p-3 border border-[var(--border-quaternary)] rounded font-mono text-sm resize-none focus:outline-none focus:border-[var(--light-blue-60)]"
-                placeholder="Enter test input"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">Expected Output</label>
-              <textarea
-                value={selectedTestCase.expectedOutput}
-                onChange={(e) => handleUpdateTestCase(selectedTestCase.id, 'expectedOutput', e.target.value)}
-                className="w-full h-24 p-3 border border-[var(--border-quaternary)] rounded font-mono text-sm resize-none focus:outline-none focus:border-[var(--light-blue-60)]"
-                placeholder="Enter expected output"
-              />
-            </div>
-
-            {/* Test Result */}
-            {selectedTestResult && (
-              <div className={`p-3 rounded border-2 ${selectedTestResult.passed ? 'bg-[var(--green-10)] border-[var(--green-60)]' : 'bg-[var(--red-10)] border-[var(--red-60)]'}`}>
-                <p className={`font-semibold mb-2 ${selectedTestResult.passed ? 'text-[var(--green-80)]' : 'text-[var(--red-80)]'}`}>
-                  {selectedTestResult.passed ? '✓ Passed' : '✗ Failed'}
-                </p>
-                {selectedTestResult.error ? (
-                  <p className="text-[var(--red-60)] font-mono text-sm">{selectedTestResult.error}</p>
-                ) : (
-                  <div className="space-y-1 text-sm">
-                    <p className="text-[var(--text-secondary)]">
-                      <span className="font-semibold">Expected:</span> {selectedTestCase.expectedOutput}
-                    </p>
-                    <p className="text-[var(--text-secondary)]">
-                      <span className="font-semibold">Actual:</span> {selectedTestResult.output}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Delete Button */}
-            {testCases.length > 1 && (
-              <button
-                onClick={() => handleDeleteTestCase(selectedTestCase.id)}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[var(--red-10)] text-[var(--red-60)] rounded hover:opacity-80 transition-opacity"
-              >
-                <Trash2 size={16} />
-                Delete Test Case
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+    <TestCasesPanel
+      testCases={testCases}
+      selectedTestCaseId={selectedTestCaseId}
+      testResults={testResults}
+      onAddTestCase={handleAddTestCase}
+      onDeleteTestCase={handleDeleteTestCase}
+      onUpdateTestCase={handleUpdateTestCase}
+      onSelectTestCase={setSelectedTestCaseId}
+    />
   );
 
   return (
