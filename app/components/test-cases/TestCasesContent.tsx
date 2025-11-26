@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2, Plus, X } from 'lucide-react';
-import { TestCase } from './TestCasesPanel';
+import type { TestCase } from '@/types';
 
 interface TestCasesContentProps {
     testCases: TestCase[];

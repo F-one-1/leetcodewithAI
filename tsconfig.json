@@ -25,6 +25,15 @@
     "paths": {
       "@/*": [
         "./app/*"
+      ],
+      "@/hooks": [
+        "./app/hooks"
+      ],
+      "@/types": [
+        "./types"
+      ],
+      "@/constants": [
+        "./app/constants"
       ]
     }
   },

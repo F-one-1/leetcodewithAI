@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     try {
         const { id } = await params;
         const problemId = id;
-        const problemDir = path.join(process.cwd(), 'app/data', problemId);
+        const problemDir = path.join(process.cwd(), 'data', problemId);
         const contentPath = path.join(problemDir, 'content.txt');
         const codeExamplePath = path.join(problemDir, 'codeExample.txt');
 

@@ -1,15 +1,10 @@
 'use client';
 
 import { FileText, CheckCircle } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { TestCasesContent } from './TestCasesContent';
 import { TestResultsContent } from './TestResultsContent';
-
-export interface TestCase {
-    id: string;
-    input: string;
-    expectedOutput: string;
-}
+import type { TestCase } from '@/types';
 
 interface TestCasesPanelProps {
     testCases: TestCase[];

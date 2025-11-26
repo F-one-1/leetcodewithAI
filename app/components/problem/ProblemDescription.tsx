@@ -2,13 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import type { ProblemData } from '@/types/problem';
 
-export interface ProblemData {
-    id: string;
-    title: string;
-    difficulty: string;
-    content: string;
-}
+// Re-export for backward compatibility
+export type { ProblemData };
 
 interface ProblemDescriptionProps {
     problemId?: string;
