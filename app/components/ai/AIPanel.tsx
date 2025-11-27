@@ -369,7 +369,7 @@ export const AIPanel = ({
             }}
             placeholder="提问或输入命令..."
             disabled={isLoading}
-            className="flex-1 px-3 py-2 border border-[var(--border-quaternary)] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--light-blue-60)] disabled:bg-[var(--layer-bg-gray)] disabled:cursor-not-allowed"
+            className="flex-1 px-3 py-2 border border-[var(--border-quaternary)] rounded text-sm focus:outline-none focus:ring-2  disabled:bg-[var(--layer-bg-gray)] disabled:cursor-not-allowed"
           />
 
           {/* Send Button */}

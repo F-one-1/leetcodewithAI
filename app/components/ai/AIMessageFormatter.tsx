@@ -31,7 +31,7 @@ export const AIMessageFormatter = ({ content, isUser = false }: AIMessageFormatt
   if (isUser) {
     return (
       <div className="mb-4 flex justify-end">
-        <div className="bg-[var(--light-blue-60)] text-white rounded-lg p-3 text-sm max-w-full">
+        <div className="border border-black rounded-lg p-3 text-sm max-w-full">
           <p className="whitespace-pre-wrap break-words">{content}</p>
         </div>
       </div>
