@@ -78,24 +78,6 @@ export const Nav = ({
                             </TooltipContent>
                         </Tooltip>
                     )}
-
-                    {onAIPower && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <button
-                                    onClick={onAIPower}
-                                    disabled={loading || submitting}
-                                    title="AI Power"
-                                    className="flex items-center justify-center w-10 h-10 rounded hover:bg-[var(--light-brand-gray)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                >
-                                    <Zap size={20} className="text-yellow-500" />
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>AI Assistant</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    )}
                 </div>
 
                 {/* Right - Toggle AI Panel */}

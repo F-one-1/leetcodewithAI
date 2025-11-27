@@ -260,8 +260,6 @@ export const AIPanel = ({
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[var(--border-quaternary)] bg-white">
         <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
-          {/* Claude Logo: 可用lucide-react的 bot icon */}
-          <Lightbulb size={20} className="text-[var(--light-blue-60)]" />
           AI Assistant
         </h3>
         <button
@@ -305,7 +303,13 @@ export const AIPanel = ({
           <button
             onClick={handleAIPower}
             disabled={isAIPowerRunning || isLoading || !code}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium
+              hover:border-black border border-transparent
+              hover:cursor-pointer"
+            style={{
+              // If disabled, don't show pointer
+              cursor: (isAIPowerRunning || isLoading || !code) ? 'not-allowed' : undefined,
+            }}
           >
             <Zap size={16} />
             AI Assistant
