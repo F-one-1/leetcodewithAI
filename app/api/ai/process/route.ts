@@ -4,8 +4,6 @@ import {
   AIActionType,
   AI_PROMPTS,
   AI_PARAMS,
-  OPTIMIZATION_FOCUS,
-  AIRequestOptions,
 } from '@/lib/ai-config';
 
 export const runtime = 'nodejs';
@@ -16,122 +14,30 @@ interface Message {
   content: string;
 }
 
-interface TestResult {
-  id: string;
-  passed: boolean;
-  output: string;
-  expectedOutput: string;
-  error?: string;
-}
-
 interface AIProcessRequest {
   type: AIActionType;
-  code?: string;
   message?: string;
   conversationHistory?: Message[];
+  code?: string;
   problemDescription?: string;
-  testResults?: TestResult[];
-  issues?: string[];
-  optimizationType?: 'performance' | 'readability' | 'both';
-  language?: 'javascript' | 'typescript';
-}
-
-/**
- * Build the prompt for the given action type
- */
-function buildPrompt(
-  action: AIActionType,
-  data: {
-    code?: string;
-    message?: string;
-    problemDescription?: string;
-    testResults?: TestResult[];
-    issues?: string[];
-    language?: string;
-    optimizationType?: 'performance' | 'readability' | 'both';
-  }
-): string {
-  const config = AI_PROMPTS[action];
-  let prompt = config.userPrompt || '';
-
-  // Replace placeholders
-  if (action === 'optimize' && data.optimizationType) {
-    prompt = prompt.replace(
-      '{optimizationFocus}',
-      OPTIMIZATION_FOCUS[data.optimizationType]
-    );
-  }
-
-  if (data.language) {
-    prompt = prompt.replace(/{language}/g, data.language);
-  } else {
-    prompt = prompt.replace(/{language}/g, 'javascript');
-  }
-
-  // Add problem description if provided
-  if (data.problemDescription) {
-    prompt += `\n\nProblem Description:\n${data.problemDescription}`;
-  }
-
-  // Add code if provided
-  if (data.code) {
-    const language = data.language || 'javascript';
-    prompt += `\n\nCode to ${action === 'analyze' ? 'analyze' : action}:\n\`\`\`${language}\n${data.code}\n\`\`\``;
-  }
-
-  // Add test results for analyze action
-  if (action === 'analyze' && data.testResults && data.testResults.length > 0) {
-    const failedTests = data.testResults.filter((t) => !t.passed);
-    if (failedTests.length > 0) {
-      prompt += `\n\nTest Results:\n`;
-      prompt += `- ${data.testResults.length} total tests\n`;
-      prompt += `- ${failedTests.length} failed tests\n`;
-      failedTests.forEach((test) => {
-        prompt += `\nFailed Test (ID: ${test.id}):\n`;
-        prompt += `Expected: ${test.expectedOutput}\n`;
-        prompt += `Got: ${test.output}\n`;
-        if (test.error) {
-          prompt += `Error: ${test.error}\n`;
-        }
-      });
-    }
-  }
-
-  // Add issues for fix action
-  if (action === 'fix' && data.issues && data.issues.length > 0) {
-    prompt = `Issues to fix:\n`;
-    data.issues.forEach((issue, index) => {
-      prompt += `${index + 1}. ${issue}\n`;
-    });
-    prompt += '\n' + config.userPrompt;
-  }
-
-  return prompt;
 }
 
 /**
  * Build the system prompt for chat action
  */
 function buildSystemPrompt(
-  action: AIActionType,
-  data: {
-    code?: string;
-    problemDescription?: string;
-  }
+  code?: string,
+  problemDescription?: string,
 ): string {
-  if (action !== 'chat') {
-    return '';
-  }
-
-  const config = AI_PROMPTS[action];
+  const config = AI_PROMPTS['chat'];
   let systemPrompt = config.systemPrompt || '';
 
-  if (data.problemDescription) {
-    systemPrompt += `\n\nCurrent Problem Description:\n${data.problemDescription}`;
+  if (problemDescription) {
+    systemPrompt += `\n\nCurrent Problem Description:\n${problemDescription}`;
   }
 
-  if (data.code) {
-    systemPrompt += `\n\nCurrent Code:\n\`\`\`javascript\n${data.code}\n\`\`\``;
+  if (code) {
+    systemPrompt += `\n\nCurrent Code:\n\`\`\`javascript\n${code}\n\`\`\``;
   }
 
   return systemPrompt;
@@ -142,37 +48,23 @@ export async function POST(request: NextRequest) {
     const body: AIProcessRequest = await request.json();
     const {
       type,
-      code,
       message,
       conversationHistory = [],
+      code,
       problemDescription,
-      testResults,
-      issues,
-      optimizationType = 'both',
-      language = 'javascript',
     } = body;
 
     // Validate request
-    if (!type || !Object.keys(AI_PROMPTS).includes(type)) {
+    if (!type || type !== 'chat') {
       return NextResponse.json(
-        { error: `Invalid type: ${type}. Must be one of: ${Object.keys(AI_PROMPTS).join(', ')}` },
+        { error: `Invalid type: ${type}. Only 'chat' is supported.` },
         { status: 400 }
       );
     }
 
-    if (type === 'chat' && !message) {
+    if (!message) {
       return NextResponse.json(
         { error: 'Message is required for chat type' },
-        { status: 400 }
-      );
-    }
-
-    if (
-      (type === 'analyze' || type === 'fix' || type === 'optimize') &&
-      !code
-    ) {
-      return NextResponse.json(
-        { error: `Code is required for ${type} type` },
         { status: 400 }
       );
     }
@@ -181,32 +73,12 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    // Prepare the AI request based on type
-    let messages: Message[];
-    let systemPrompt = '';
-
-    if (type === 'chat') {
-      // For chat, use conversation history
-      messages = [
-        ...conversationHistory,
-        { role: 'user', content: message! },
-      ];
-      systemPrompt = buildSystemPrompt(type, {
-        code,
-        problemDescription,
-      });
-    } else {
-      // For analyze/fix/optimize, build the complete prompt
-      const prompt = buildPrompt(type, {
-        code,
-        problemDescription,
-        testResults,
-        issues,
-        language,
-        optimizationType,
-      });
-      messages = [{ role: 'user', content: prompt }];
-    }
+    // For chat, use conversation history
+    const messages: Message[] = [
+      ...conversationHistory,
+      { role: 'user', content: message },
+    ];
+    const systemPrompt = buildSystemPrompt(code, problemDescription);
 
     // Create a readable stream for SSE
     const stream = await client.messages.stream({
@@ -255,4 +127,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

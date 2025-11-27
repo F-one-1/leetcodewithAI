@@ -17,20 +17,12 @@ interface StreamCallback {
   onError?: (error: string) => void;
 }
 
-interface TestResult {
-  id: string;
-  passed: boolean;
-  output: string;
-  expectedOutput: string;
-  error?: string;
-}
-
 export class AIClient {
   /**
    * Internal method to call the unified AI process endpoint
    */
   private static async callAIProcess(
-    type: 'chat' | 'analyze' | 'fix' | 'optimize',
+    type: 'chat',
     callbacks: StreamCallback,
     payload: Record<string, any>
   ): Promise<void> {
@@ -78,60 +70,24 @@ export class AIClient {
   }
 
   /**
-   * Analyze code for issues and improvements
+   * AI Power mode - analyze code and return improved version
    */
-  static async analyzeCode(
+  static async aiPower(
     code: string,
     callbacks: StreamCallback,
     options?: {
       problemDescription?: string;
-      testResults?: TestResult[];
     }
   ): Promise<void> {
-    return this.callAIProcess('analyze', callbacks, {
+    const { AI_POWER_PROMPT } = await import('@/lib/ai-config');
+    
+    const message = `${AI_POWER_PROMPT}\n\nCode to analyze:\n\`\`\`javascript\n${code}\n\`\`\``;
+    
+    return this.callAIProcess('chat', callbacks, {
+      message,
+      conversationHistory: [],
       code,
       problemDescription: options?.problemDescription,
-      testResults: options?.testResults,
-    });
-  }
-
-  /**
-   * Fix code issues
-   */
-  static async fixCode(
-    code: string,
-    callbacks: StreamCallback,
-    options?: {
-      issues?: string[];
-      problemDescription?: string;
-      language?: 'javascript' | 'typescript';
-    }
-  ): Promise<void> {
-    return this.callAIProcess('fix', callbacks, {
-      code,
-      issues: options?.issues || [],
-      problemDescription: options?.problemDescription,
-      language: options?.language || 'javascript',
-    });
-  }
-
-  /**
-   * Optimize code for performance or readability
-   */
-  static async optimizeCode(
-    code: string,
-    callbacks: StreamCallback,
-    options?: {
-      optimizationType?: 'performance' | 'readability' | 'both';
-      problemDescription?: string;
-      language?: 'javascript' | 'typescript';
-    }
-  ): Promise<void> {
-    return this.callAIProcess('optimize', callbacks, {
-      code,
-      optimizationType: options?.optimizationType || 'both',
-      problemDescription: options?.problemDescription,
-      language: options?.language || 'javascript',
     });
   }
 

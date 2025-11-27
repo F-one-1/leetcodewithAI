@@ -1,0 +1,30 @@
+ /**
+ * Finds the maximum profit from buying and selling a stock once.
+ * You must buy before you sell. If no profit is possible, return 0.
+ * 
+ * @param {number[]} prices - Array of integers representing stock prices
+ * @return {number} Maximum profit possible, or 0 if no profit can be made
+ */
+var maxProfit = function(prices) {
+    // Edge case: cannot buy and sell with fewer than 2 prices
+    if (!prices || prices.length < 2) {
+        return 0;
+    }
+    
+    let minPrice = prices[0];  // Track the minimum price seen so far
+    let maxProfit = 0;         // Track the maximum profit found
+    
+    // Iterate through prices starting from index 1
+    for (let i = 1; i < prices.length; i++) {
+        // Calculate profit if we sell at current price
+        const currentProfit = prices[i] - minPrice;
+        
+        // Update max profit if current profit is better
+        maxProfit = Math.max(maxProfit, currentProfit);
+        
+        // Update min price if current price is lower
+        minPrice = Math.min(minPrice, prices[i]);
+    }
+    
+    return maxProfit;
+};

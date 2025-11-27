@@ -1,5 +1,5 @@
 'use client';
-import { Play, Send } from 'lucide-react';
+import { Play, Send, Zap } from 'lucide-react';
 import Image from 'next/image';
 import {
     Tooltip,
@@ -15,6 +15,7 @@ interface NavProps {
     submitting?: boolean;
     showAIPanel: boolean;
     onToggleAIPanel: () => void;
+    onAIPower?: () => void;
 }
 
 export const Nav = ({
@@ -24,6 +25,7 @@ export const Nav = ({
     submitting = false,
     showAIPanel,
     onToggleAIPanel,
+    onAIPower,
 }: NavProps) => {
     return (
         <TooltipProvider>
@@ -46,6 +48,8 @@ export const Nav = ({
                             <button
                                 onClick={onRun}
                                 disabled={loading}
+                                title="运行"
+                                data-testid="run-button"
                                 className="flex items-center justify-center w-10 h-10 rounded hover:bg-[var(--light-brand-gray)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
                             >
                                 <Play size={20} />
@@ -62,6 +66,8 @@ export const Nav = ({
                                 <button
                                     onClick={onSubmit}
                                     disabled={submitting || loading}
+                                    title="提交"
+                                    data-testid="submit-button"
                                     className="flex items-center justify-center w-10 h-10 rounded hover:bg-[var(--light-brand-gray)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
                                 >
                                     <Send size={20} />
@@ -69,6 +75,24 @@ export const Nav = ({
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>提交</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+
+                    {onAIPower && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={onAIPower}
+                                    disabled={loading || submitting}
+                                    title="AI Power"
+                                    className="flex items-center justify-center w-10 h-10 rounded hover:bg-[var(--light-brand-gray)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                >
+                                    <Zap size={20} className="text-yellow-500" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>AI Assistant</p>
                             </TooltipContent>
                         </Tooltip>
                     )}

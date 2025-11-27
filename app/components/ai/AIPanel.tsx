@@ -4,15 +4,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Send,
   X,
-  Zap,
-  Wrench,
-  Lightbulb,
   Trash2,
   Loader,
+  Lightbulb,
+  Zap,
 } from 'lucide-react';
 import { AIMessageFormatter } from './AIMessageFormatter';
 import { AIClient } from '@/lib/ai-client';
+import { extractModifiedCodeFromAnalysis } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import type { CodeEditorHandle } from '@/components/code-editor/CodeEditor';
 
 interface AIMessage {
   id: string;
@@ -26,6 +27,9 @@ interface AIPanelProps {
   problemDescription?: string;
   testResults?: any[];
   onClose?: () => void;
+  codeEditorRef?: React.RefObject<CodeEditorHandle>;
+  onExecuteCode?: () => Promise<void>;
+  onCodeChange?: (code: string) => void;
 }
 
 export const AIPanel = ({
@@ -33,6 +37,9 @@ export const AIPanel = ({
   problemDescription = '',
   testResults = [],
   onClose,
+  codeEditorRef,
+  onExecuteCode,
+  onCodeChange,
 }: AIPanelProps) => {
   const [messages, setMessages] = useState<AIMessage[]>([
     {
@@ -44,7 +51,7 @@ export const AIPanel = ({
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [currentAction, setCurrentAction] = useState<'analyze' | 'fix' | 'optimize' | null>(null);
+  const [isAIPowerRunning, setIsAIPowerRunning] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -113,154 +120,139 @@ export const AIPanel = ({
     }
   };
 
-  const handleQuickAction = async (action: 'analyze' | 'fix' | 'optimize') => {
-    if (!code || isLoading) {
-      toast.error('请先输入代码');
-      return;
-    }
+  const handleClearMessages = () => {
+    setMessages([messages[0]]); // 保留系统消息
+    toast.success('对话已清除');
+  };
 
-    setCurrentAction(action);
-    setIsLoading(true);
+  const handleAIPower = async () => {
+    if (!code || isAIPowerRunning || isLoading) return;
 
-    const actionMessages = {
-      analyze: '📊 分析代码中...',
-      fix: '🔧 修复代码中...',
-      optimize: '⚡ 优化代码中...',
-    };
-
+    setIsAIPowerRunning(true);
     const assistantMessageId = Date.now().toString();
-    let assistantContent = '';
+    let aiContent = '';
 
     try {
-      if (action === 'analyze') {
-        await AIClient.analyzeCode(code, {
-          onData: (chunk) => {
-            assistantContent += chunk;
-            setMessages((prev) => {
-              const lastMessage = prev[prev.length - 1];
-              if (lastMessage?.id === assistantMessageId) {
-                return [
-                  ...prev.slice(0, -1),
-                  { ...lastMessage, content: assistantContent },
-                ];
-              }
-              return [
-                ...prev,
-                {
-                  id: assistantMessageId,
-                  role: 'assistant',
-                  content: assistantContent,
-                  timestamp: new Date(),
-                },
-              ];
-            });
-          },
-          onComplete: () => {
-            setIsLoading(false);
-            setCurrentAction(null);
-          },
-          onError: (error) => {
-            toast.error(`错误: ${error}`);
-            setIsLoading(false);
-            setCurrentAction(null);
-          },
-        }, {
-          problemDescription,
-          testResults,
-        });
-      } else if (action === 'fix') {
-        await AIClient.fixCode(code, {
-          onData: (chunk) => {
-            assistantContent += chunk;
-            setMessages((prev) => {
-              const lastMessage = prev[prev.length - 1];
-              if (lastMessage?.id === assistantMessageId) {
-                return [
-                  ...prev.slice(0, -1),
-                  { ...lastMessage, content: assistantContent },
-                ];
-              }
-              return [
-                ...prev,
-                {
-                  id: assistantMessageId,
-                  role: 'assistant',
-                  content: assistantContent,
-                  timestamp: new Date(),
-                },
-              ];
-            });
-          },
-          onComplete: () => {
-            setIsLoading(false);
-            setCurrentAction(null);
-          },
-          onError: (error) => {
-            toast.error(`错误: ${error}`);
-            setIsLoading(false);
-            setCurrentAction(null);
-          },
-        }, {
-          problemDescription,
-        });
-      } else if (action === 'optimize') {
-        await AIClient.optimizeCode(code, {
-          onData: (chunk) => {
-            assistantContent += chunk;
-            setMessages((prev) => {
-              const lastMessage = prev[prev.length - 1];
-              if (lastMessage?.id === assistantMessageId) {
-                return [
-                  ...prev.slice(0, -1),
-                  { ...lastMessage, content: assistantContent },
-                ];
-              }
-              return [
-                ...prev,
-                {
-                  id: assistantMessageId,
-                  role: 'assistant',
-                  content: assistantContent,
-                  timestamp: new Date(),
-                },
-              ];
-            });
-          },
-          onComplete: () => {
-            setIsLoading(false);
-            setCurrentAction(null);
-          },
-          onError: (error) => {
-            toast.error(`错误: ${error}`);
-            setIsLoading(false);
-            setCurrentAction(null);
-          },
-        }, {
-          optimizationType: action === 'optimize' ? 'both' : undefined,
-          problemDescription,
-        });
-      }
-
       // 添加用户操作消息
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() - 1).toString(),
           role: 'user',
-          content: actionMessages[action],
+          content: '🚀 请分析并改进这段代码',
+          timestamp: new Date(),
+        },
+      ]);
+
+      // 调用 AI Power
+      await AIClient.aiPower(code, {
+        onData: (chunk) => {
+          aiContent += chunk;
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage?.id === assistantMessageId) {
+              return [
+                ...prev.slice(0, -1),
+                { ...lastMessage, content: aiContent },
+              ];
+            }
+            return [
+              ...prev,
+              {
+                id: assistantMessageId,
+                role: 'assistant',
+                content: aiContent,
+                timestamp: new Date(),
+              },
+            ];
+          });
+        },
+        onComplete: async () => {
+          // 完成后处理：提取代码、修改编辑器、执行代码
+          await executeAIPowerFlow(aiContent);
+        },
+        onError: (error) => {
+          toast.error(`错误: ${error}`);
+          setIsAIPowerRunning(false);
+        },
+      }, {
+        problemDescription,
+      });
+    } catch (error) {
+      toast.error('AI Power 处理失败');
+      setIsAIPowerRunning(false);
+    }
+  };
+
+  const executeAIPowerFlow = async (aiContent: string) => {
+    try {
+      // 1. 提取改进后的代码
+      const modifiedCode = extractModifiedCodeFromAnalysis(aiContent);
+      if (!modifiedCode) {
+        toast.error('无法提取改进的代码');
+        setIsAIPowerRunning(false);
+        return;
+      }
+
+      // 2. 显示进度消息
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'system',
+          content: '🎬 正在更新编辑器中的代码...',
+          timestamp: new Date(),
+        },
+      ]);
+
+      // 3. 通过打字机修改编辑器
+      if (codeEditorRef?.current?.streamCharByChar) {
+        await codeEditorRef.current.streamCharByChar(modifiedCode, 20);
+      }
+
+      // 4. 更新代码状态
+      onCodeChange?.(modifiedCode);
+
+      // 5. 显示完成消息
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: 'system',
+          content: '✅ 代码已更新完成！',
+          timestamp: new Date(),
+        },
+      ]);
+
+      // 6. 自动执行代码
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 3).toString(),
+          role: 'system',
+          content: '⏱️ 正在执行代码...',
+          timestamp: new Date(),
+        },
+      ]);
+
+      await onExecuteCode?.();
+
+      // 7. 显示最终结果
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 4).toString(),
+          role: 'system',
+          content: '✅ 代码执行完成！请查看下方的测试结果。',
           timestamp: new Date(),
         },
       ]);
     } catch (error) {
-      toast.error('操作失败');
-      setIsLoading(false);
-      setCurrentAction(null);
+      console.error('AI Power 流程错误:', error);
+      toast.error('执行流程出错');
+    } finally {
+      setIsAIPowerRunning(false);
     }
-  };
-
-  const handleClearMessages = () => {
-    setMessages([messages[0]]); // 保留系统消息
-    toast.success('对话已清除');
   };
 
   return (
@@ -296,7 +288,7 @@ export const AIPanel = ({
           </div>
         ))}
 
-        {isLoading && !currentAction && (
+        {isLoading && (
           <div className="flex items-center gap-2 text-[var(--text-secondary)]">
             <Loader className="animate-spin" size={16} />
             <span className="text-sm">正在思考...</span>
@@ -308,6 +300,18 @@ export const AIPanel = ({
 
       {/* Input Area */}
       <div className="shrink-0 px-4 py-3 border-t border-[var(--border-quaternary)] bg-white space-y-2">
+        {/* AI Power Button */}
+        <div>
+          <button
+            onClick={handleAIPower}
+            disabled={isAIPowerRunning || isLoading || !code}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            <Zap size={16} />
+            AI Assistant
+          </button>
+        </div>
+
         <div className="flex gap-2">
           <input
             type="text"
@@ -323,32 +327,6 @@ export const AIPanel = ({
             disabled={isLoading}
             className="flex-1 px-3 py-2 border border-[var(--border-quaternary)] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--light-blue-60)] disabled:bg-[var(--layer-bg-gray)] disabled:cursor-not-allowed"
           />
-
-          {/* Quick Action Buttons - Icon Only */}
-          <button
-            onClick={() => handleQuickAction('analyze')}
-            disabled={isLoading || !code}
-            title="分析代码"
-            className="p-2 text-[var(--light-blue-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-          >
-            <Zap size={18} />
-          </button>
-          <button
-            onClick={() => handleQuickAction('fix')}
-            disabled={isLoading || !code}
-            title="修复代码"
-            className="p-2 text-[var(--light-brand-orange)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-          >
-            <Wrench size={18} />
-          </button>
-          <button
-            onClick={() => handleQuickAction('optimize')}
-            disabled={isLoading || !code}
-            title="优化代码"
-            className="p-2 text-[var(--light-green-60)] hover:bg-[var(--layer-bg-gray)] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
-          >
-            <Lightbulb size={18} />
-          </button>
 
           {/* Send Button */}
           <button
