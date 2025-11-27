@@ -8,6 +8,11 @@ import {
   Loader,
   Lightbulb,
   Zap,
+  Hand,
+  Rocket,
+  Film,
+  CheckCircle2,
+  Clock,
 } from 'lucide-react';
 import { AIMessageFormatter } from './AIMessageFormatter';
 import { AIClient } from '@/lib/ai-client';
@@ -41,6 +46,39 @@ export const AIPanel = ({
   onExecuteCode,
   onCodeChange,
 }: AIPanelProps) => {
+  // 辅助函数：将消息中的 emoji 替换为图标组件
+  const renderMessageWithIcons = (content: string) => {
+    const iconMap: { [key: string]: React.ReactNode } = {
+      '👋': <Hand size={16} className="inline-block mr-1" />,
+      '🚀': <Rocket size={16} className="inline-block mr-1" />,
+      '🎬': <Film size={16} className="inline-block mr-1" />,
+      '✅': <CheckCircle2 size={16} className="inline-block mr-1" />,
+      '⏱️': <Clock size={16} className="inline-block mr-1" />,
+      '💡': <Lightbulb size={16} className="inline-block mr-1" />,
+    };
+
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    const emojiRegex = /(👋|🚀|🎬|✅|⏱️|💡)/g;
+    let match;
+
+    while ((match = emojiRegex.exec(content)) !== null) {
+      // 添加 emoji 之前的文本
+      if (match.index > lastIndex) {
+        parts.push(content.substring(lastIndex, match.index));
+      }
+      // 添加图标组件
+      parts.push(iconMap[match[0]]);
+      lastIndex = match.index + match[0].length;
+    }
+    // 添加剩余文本
+    if (lastIndex < content.length) {
+      parts.push(content.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : content;
+  };
+
   const [messages, setMessages] = useState<AIMessage[]>([
     {
       id: '0',
@@ -139,7 +177,7 @@ export const AIPanel = ({
         {
           id: (Date.now() - 1).toString(),
           role: 'user',
-          content: '🚀 请分析并改进这段代码',
+          content: '请分析并改进这段代码',
           timestamp: new Date(),
         },
       ]);
@@ -279,7 +317,9 @@ export const AIPanel = ({
         {messages.map((msg) => (
           <div key={msg.id}>
             {msg.role === 'system' ? (
-              <div className="mb-3 text-center text-sm text-[var(--text-quaternary)]">{msg.content}</div>
+              <div className="mb-3 text-center text-sm text-[var(--text-quaternary)] flex items-center justify-center gap-1">
+                {renderMessageWithIcons(msg.content)}
+              </div>
             ) : (
               <AIMessageFormatter content={msg.content} isUser={msg.role === 'user'} />
             )}
@@ -336,7 +376,7 @@ export const AIPanel = ({
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !inputValue.trim()}
-            className="p-2 bg-[var(--light-blue-60)] text-white rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+            className="p-2 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity  hover:border-black border border-transparent hover:cursor-pointer"
           >
             <Send size={18} />
           </button>
@@ -344,8 +384,9 @@ export const AIPanel = ({
 
         {/* Tips and Clear Button */}
         <div className="flex items-center justify-between">
-          <p className="text-xs text-[var(--text-quaternary)]">
-            💡 Tip: 按 Enter 发送，Shift+Enter 换行
+          <p className="text-xs text-[var(--text-quaternary)] flex items-center gap-1">
+            <Lightbulb size={14} />
+            <span>Tip: 按 Enter 发送，Shift+Enter 换行</span>
           </p>
           <button
             onClick={handleClearMessages}

@@ -32,11 +32,9 @@ Focus on JavaScript and TypeScript.`,
 export const AI_POWER_PROMPT = `Please analyze the following code for a LeetCode-style problem.
 Provide a detailed analysis covering:
 1. Correctness issues (if any)
-2. Time complexity and space complexity
-3. Edge cases that might fail
-4. Code quality and readability issues
-5. Performance optimization suggestions
-6. Best practices recommendations
+2. Code quality and readability issues
+3. Performance optimization recommendation
+4. Best practice recommendation
 
 After your analysis, provide an improved version of the code that addresses the issues you identified.
 Please provide the improved code in a code block with proper syntax highlighting.`;
