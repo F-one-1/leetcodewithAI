@@ -40,14 +40,18 @@ export default function Home() {
   };
 
   const handleExecuteAll = async () => {
-    const success = await executeCode(code, testCases);
+    // 从编辑器直接获取最新代码，确保执行的是更新后的代码
+    const currentCode = codeEditorRef.current?.getValue() || code;
+    const success = await executeCode(currentCode, testCases);
     if (success) {
       setActiveTestTab('test-results');
     }
   };
 
   const handleSubmit = async () => {
-    const success = await submitCode(code, problemId);
+    // 从编辑器直接获取最新代码，确保执行的是更新后的代码
+    const currentCode = codeEditorRef.current?.getValue() || code;
+    const success = await submitCode(currentCode, problemId);
     if (success) {
       setActiveTestTab('test-results');
     }

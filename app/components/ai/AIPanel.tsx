@@ -8,11 +8,6 @@ import {
   Loader,
   Lightbulb,
   Zap,
-  Hand,
-  Rocket,
-  Film,
-  CheckCircle2,
-  Clock,
 } from 'lucide-react';
 import { AIMessageFormatter } from './AIMessageFormatter';
 import { AIClient } from '@/lib/ai-client';
@@ -46,44 +41,11 @@ export const AIPanel = ({
   onExecuteCode,
   onCodeChange,
 }: AIPanelProps) => {
-  // 辅助函数：将消息中的 emoji 替换为图标组件
-  const renderMessageWithIcons = (content: string) => {
-    const iconMap: { [key: string]: React.ReactNode } = {
-      '👋': <Hand size={16} className="inline-block mr-1" />,
-      '🚀': <Rocket size={16} className="inline-block mr-1" />,
-      '🎬': <Film size={16} className="inline-block mr-1" />,
-      '✅': <CheckCircle2 size={16} className="inline-block mr-1" />,
-      '⏱️': <Clock size={16} className="inline-block mr-1" />,
-      '💡': <Lightbulb size={16} className="inline-block mr-1" />,
-    };
-
-    const parts: React.ReactNode[] = [];
-    let lastIndex = 0;
-    const emojiRegex = /(👋|🚀|🎬|✅|⏱️|💡)/g;
-    let match;
-
-    while ((match = emojiRegex.exec(content)) !== null) {
-      // 添加 emoji 之前的文本
-      if (match.index > lastIndex) {
-        parts.push(content.substring(lastIndex, match.index));
-      }
-      // 添加图标组件
-      parts.push(iconMap[match[0]]);
-      lastIndex = match.index + match[0].length;
-    }
-    // 添加剩余文本
-    if (lastIndex < content.length) {
-      parts.push(content.substring(lastIndex));
-    }
-
-    return parts.length > 0 ? parts : content;
-  };
-
   const [messages, setMessages] = useState<AIMessage[]>([
     {
       id: '0',
       role: 'system',
-      content: '👋 Hi! 我是你的 AI 编程助手。我可以帮你分析代码、找出问题、提供优化建议。',
+      content: 'Hi! 我是你的 AI 编程助手。我可以帮你分析代码、找出问题、提供优化建议。',
       timestamp: new Date(),
     },
   ]);
@@ -238,14 +200,15 @@ export const AIPanel = ({
         {
           id: (Date.now() + 1).toString(),
           role: 'system',
-          content: '🎬 正在更新编辑器中的代码...',
+          content: '正在更新编辑器中的代码...',
           timestamp: new Date(),
         },
       ]);
 
       // 3. 通过打字机修改编辑器
+      // delayMs: 每个字符的延迟时间（毫秒），数值越小速度越快
       if (codeEditorRef?.current?.streamCharByChar) {
-        await codeEditorRef.current.streamCharByChar(modifiedCode, 20);
+        await codeEditorRef.current.streamCharByChar(modifiedCode, 5);
       }
 
       // 4. 更新代码状态
@@ -257,18 +220,19 @@ export const AIPanel = ({
         {
           id: (Date.now() + 2).toString(),
           role: 'system',
-          content: '✅ 代码已更新完成！',
+          content: '代码已更新完成！',
           timestamp: new Date(),
         },
       ]);
 
       // 6. 自动执行代码
+      // 注意：onExecuteCode 会从编辑器直接获取最新代码，确保执行的是更新后的代码
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 3).toString(),
           role: 'system',
-          content: '⏱️ 正在执行代码...',
+          content: '正在执行代码...',
           timestamp: new Date(),
         },
       ]);
@@ -281,7 +245,7 @@ export const AIPanel = ({
         {
           id: (Date.now() + 4).toString(),
           role: 'system',
-          content: '✅ 代码执行完成！请查看下方的测试结果。',
+          content: '代码执行完成！请查看下方的测试结果。',
           timestamp: new Date(),
         },
       ]);
@@ -318,7 +282,7 @@ export const AIPanel = ({
           <div key={msg.id}>
             {msg.role === 'system' ? (
               <div className="mb-3 text-center text-sm text-[var(--text-quaternary)] flex items-center justify-center gap-1">
-                {renderMessageWithIcons(msg.content)}
+                {msg.content}
               </div>
             ) : (
               <AIMessageFormatter content={msg.content} isUser={msg.role === 'user'} />
