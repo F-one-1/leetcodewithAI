@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         const problemDir = path.join(process.cwd(), 'data', problemId);
         const contentPath = path.join(problemDir, 'content.txt');
         const codeExamplePath = path.join(problemDir, 'codeExample.txt');
-
+        r
         // 检查是否请求所有测试用例
         const { searchParams } = new URL(request.url);
         const allCases = searchParams.get('all') === 'true';
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         if (fs.existsSync(testCasesPath)) {
             const testCasesContent = fs.readFileSync(testCasesPath, 'utf-8');
             testCases = JSON.parse(testCasesContent);
-        }
+        } r
 
         // 解析题目信息
         const parsedInfo = parseProblemId(problemId);

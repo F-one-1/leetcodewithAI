@@ -81,32 +81,52 @@ function executeCodeWithTimeout(
 
       // If function name and args are provided, call the function and log the result
       if (functionName && functionArgs !== undefined) {
-        const func = context[functionName];
-        if (typeof func === 'function') {
-          // For LeetCode style, usually the function takes an array as the first parameter
-          // If functionArgs is already an array, pass it directly; otherwise wrap it
-          let result: any;
-          if (Array.isArray(functionArgs)) {
-            // Pass array as first parameter (common LeetCode pattern)
-            result = func(functionArgs);
-          } else {
-            // For non-array inputs, pass directly
-            result = func(functionArgs);
-          }
-          
-          // Log the result
-          if (typeof result === 'object') {
-            try {
-              outputs.push(JSON.stringify(result));
-            } catch {
+        // Verify function exists in the sandbox context
+        if (typeof context[functionName] === 'function') {
+          // Store function arguments in sandbox context
+          // This allows the function call to happen within the sandbox
+          context.__functionArgs__ = functionArgs;
+          context.__result__ = undefined;
+
+          // Execute function call within the sandbox context
+          // This ensures the function runs in the same isolated environment
+          try {
+            // Build the function call code string
+            // Handle different argument types (array, object, primitive)
+            let callCode: string;
+            if (Array.isArray(functionArgs)) {
+              // For arrays, pass as single parameter (common LeetCode pattern)
+              callCode = `__result__ = ${functionName}(__functionArgs__);`;
+            } else {
+              // For other types, pass directly
+              callCode = `__result__ = ${functionName}(__functionArgs__);`;
+            }
+
+            // Execute the function call in the sandbox
+            runInContext(callCode, context);
+
+            // Get the result from the sandbox context
+            const result = context.__result__;
+
+            // Log the result
+            if (typeof result === 'object' && result !== null) {
+              try {
+                outputs.push(JSON.stringify(result));
+              } catch {
+                outputs.push(String(result));
+              }
+            } else {
               outputs.push(String(result));
             }
-          } else {
-            outputs.push(String(result));
+            clearTimeout(timeoutId);
+            resolve(result);
+            return;
+          } catch (callError) {
+            // If function call fails, reject with the error
+            clearTimeout(timeoutId);
+            reject(callError);
+            return;
           }
-          clearTimeout(timeoutId);
-          resolve(result);
-          return;
         }
       }
 
@@ -147,7 +167,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
 
       // Execute the user code first to define the function
       await executeCodeWithTimeout(code, outputs);
-      
+      console.log(outputs, 'outputs')
       // If there are test cases, run them by calling the function
       if (testCases.length > 0 && functionName) {
         for (const testCase of testCases) {
@@ -175,14 +195,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
             await executeCodeWithTimeout(code, testOutputs, 5000, functionName, functionArgs);
 
             const testOutput = testOutputs[testOutputs.length - 1] || '';
-            
+
             // Compare output with expected output
             // Try to parse both as JSON for proper comparison of numbers, arrays, objects
             let passed = false;
             try {
               let testOutputValue: any = testOutput;
               let expectedOutputValue: any = testCase.expectedOutput;
-              
+
               // Try to parse testOutput as JSON
               try {
                 testOutputValue = JSON.parse(testOutput);
@@ -192,7 +212,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
                   testOutputValue = Number(testOutput);
                 }
               }
-              
+
               // Compare values
               if (typeof testOutputValue === 'number' && typeof expectedOutputValue === 'number') {
                 passed = testOutputValue === expectedOutputValue;
