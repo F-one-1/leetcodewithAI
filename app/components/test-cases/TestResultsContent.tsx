@@ -1,12 +1,12 @@
 'use client';
 
 import { Trash2, Plus, X } from 'lucide-react';
-import type { TestCase } from '@/types';
+import type { TestCase, TestResult } from '@/types';
 
 interface TestResultsContentProps {
     testCases: TestCase[];
     selectedTestCaseId: string;
-    testResults: Record<string, { output: string; passed: boolean; error?: string }>;
+    testResults: Record<string, TestResult>;
     onAddTestCase: () => void;
     onDeleteTestCase: (id: string) => void;
     onUpdateTestCase: (id: string, field: 'input' | 'expectedOutput', value: string) => void;
@@ -130,6 +130,17 @@ export const TestResultsContent = ({
                             disabled
                             className="w-full h-24 p-3 border border-[var(--border-quaternary)] rounded font-mono text-sm resize-none bg-gray-50 text-[var(--text-tertiary)] cursor-not-allowed"
                             placeholder="Enter expected output"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            标准输出
+                        </label>
+                        <textarea
+                            value={testResults[selectedTestCase.id]?.consoleOutput || ''}
+                            readOnly
+                            className="w-full h-24 p-3 border border-[var(--border-quaternary)] rounded font-mono text-sm resize-none bg-gray-50 text-[var(--text-tertiary)] focus:outline-none"
+                            placeholder="Console output will be shown here"
                         />
                     </div>
                     <div>

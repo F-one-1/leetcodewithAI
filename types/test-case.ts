@@ -8,5 +8,6 @@ export interface TestResult {
   output: string;
   passed: boolean;
   error?: string;
+  consoleOutput?: string;
 }
 

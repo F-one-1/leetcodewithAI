@@ -61,6 +61,7 @@ export function useCodeExecution() {
                   output: apiTestResults[index].output || '',
                   passed: apiTestResults[index].passed || false,
                   error: apiTestResults[index].error,
+                  consoleOutput: apiTestResults[index].consoleOutput,
                 };
               }
             });
@@ -133,6 +134,7 @@ export function useCodeExecution() {
               output: apiTestResults[index].output || '',
               passed: apiTestResults[index].passed || false,
               error: apiTestResults[index].error,
+              consoleOutput: apiTestResults[index].consoleOutput,
             };
           }
         });

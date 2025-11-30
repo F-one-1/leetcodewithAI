@@ -19,6 +19,7 @@ interface ExecuteResponse {
     output: string;
     expectedOutput?: any;
     error?: string;
+    consoleOutput?: string;
   }>;
 }
 
@@ -41,13 +42,42 @@ function detectFunctionName(code: string): string | null {
   return null;
 }
 
+// Helper function to create a sandbox context with user code
+function createCodeContext(code: string, outputs: string[]): any {
+  const sandbox: any = {
+    console: {
+      log: (...args: any[]) => {
+        outputs.push(
+          args
+            .map((arg) => {
+              if (typeof arg === 'object') {
+                try {
+                  return JSON.stringify(arg);
+                } catch {
+                  return String(arg);
+                }
+              }
+              return String(arg);
+            })
+            .join(' ')
+        );
+      },
+    },
+  };
+
+  const context = createContext(sandbox);
+  runInContext(code, context);
+  return context;
+}
+
 // Helper function to execute code with timeout
 function executeCodeWithTimeout(
   code: string,
   outputs: string[],
   timeoutMs: number = 5000,
   functionName?: string | null,
-  functionArgs?: any
+  functionArgs?: any,
+  existingContext?: any
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
@@ -55,29 +85,8 @@ function executeCodeWithTimeout(
     }, timeoutMs);
 
     try {
-      const sandbox: any = {
-        console: {
-          log: (...args: any[]) => {
-            outputs.push(
-              args
-                .map((arg) => {
-                  if (typeof arg === 'object') {
-                    try {
-                      return JSON.stringify(arg);
-                    } catch {
-                      return String(arg);
-                    }
-                  }
-                  return String(arg);
-                })
-                .join(' ')
-            );
-          },
-        },
-      };
-
-      const context = createContext(sandbox);
-      runInContext(code, context);
+      // Use existing context if provided, otherwise create a new one
+      const context = existingContext || createCodeContext(code, outputs);
 
       // If function name and args are provided, call the function and log the result
       if (functionName && functionArgs !== undefined) {
@@ -167,7 +176,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
 
       // Execute the user code first to define the function
       await executeCodeWithTimeout(code, outputs);
-      console.log(outputs, 'outputs')
+
+      // Create a shared context for test cases to avoid re-executing user code
+      let sharedContext: any = null;
+      if (testCases.length > 0 && functionName) {
+        const tempOutputs: string[] = [];
+        sharedContext = createCodeContext(code, tempOutputs);
+      }
+
       // If there are test cases, run them by calling the function
       if (testCases.length > 0 && functionName) {
         for (const testCase of testCases) {
@@ -191,10 +207,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
               functionArgs = [];
             }
 
-            // Execute code and call function with test case input
-            await executeCodeWithTimeout(code, testOutputs, 5000, functionName, functionArgs);
+            // Execute function call with test case input using shared context
+            // This avoids re-executing the user code for each test case
+            await executeCodeWithTimeout(code, testOutputs, 5000, functionName, functionArgs, sharedContext);
 
-            const testOutput = testOutputs[testOutputs.length - 1] || '';
+            // Separate console output from function return value
+            // The last element is the function return value, everything else is console.log output
+            const testOutput = testOutputs.length > 0 ? testOutputs[testOutputs.length - 1] || '' : '';
+            const consoleOutput = testOutputs.length > 1
+              ? testOutputs.slice(0, -1).join('\n')
+              : '';
 
             // Compare output with expected output
             // Try to parse both as JSON for proper comparison of numbers, arrays, objects
@@ -229,6 +251,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
             testResults.push({
               passed,
               output: testOutput,
+              consoleOutput: consoleOutput || undefined,
               expectedOutput: testCase.expectedOutput,
             });
           } catch (error) {
@@ -247,18 +270,24 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
             const testOutputs: string[] = [];
             await executeCodeWithTimeout(code, testOutputs);
 
-            const testOutput = testOutputs[testOutputs.length - 1] || '';
+            // Separate console output from function return value
+            const testOutput = testOutputs.length > 0 ? testOutputs[testOutputs.length - 1] || '' : '';
+            const consoleOutput = testOutputs.length > 1
+              ? testOutputs.slice(0, -1).join('\n')
+              : '';
             const passed = testOutput === String(testCase.expectedOutput);
 
             testResults.push({
               passed,
               output: testOutput,
+              consoleOutput: consoleOutput || undefined,
               expectedOutput: testCase.expectedOutput,
             });
           } catch (error) {
             testResults.push({
               passed: false,
               output: '',
+              consoleOutput: undefined,
               expectedOutput: testCase.expectedOutput,
               error: String(error),
             });
