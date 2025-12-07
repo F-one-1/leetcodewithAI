@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
     systemPrompt += 'Always provide clear, concise explanations. ';
     systemPrompt += 'When discussing code, use code blocks with proper formatting. ';
     systemPrompt += 'Focus on JavaScript and TypeScript.\n\n';
+    systemPrompt += '使用中文回答\n\n';
 
     if (problemDescription) {
       systemPrompt += `Current Problem Description:\n${problemDescription}\n\n`;
