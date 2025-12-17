@@ -9,14 +9,25 @@ export type { ProblemData };
 
 interface ProblemDescriptionProps {
     problemId?: string;
+    initialData?: ProblemData;
 }
 
-export const ProblemDescription = ({ problemId = '121-easy-Best-Time-to-Buy-and-Sell-Stock' }: ProblemDescriptionProps) => {
-    const [problemData, setProblemData] = useState<ProblemData | null>(null);
-    const [loading, setLoading] = useState(true);
+export const ProblemDescription = ({ 
+    problemId = '121-easy-Best-Time-to-Buy-and-Sell-Stock',
+    initialData 
+}: ProblemDescriptionProps) => {
+    const [problemData, setProblemData] = useState<ProblemData | null>(initialData || null);
+    const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // 如果有初始数据，不需要请求
+        if (initialData) {
+            setProblemData(initialData);
+            setLoading(false);
+            return;
+        }
+
         const fetchProblemData = async () => {
             if (!problemId) {
                 setLoading(false);
@@ -37,7 +48,7 @@ export const ProblemDescription = ({ problemId = '121-easy-Best-Time-to-Buy-and-
         };
 
         fetchProblemData();
-    }, [problemId]);
+    }, [problemId, initialData]);
 
     return (
         <div className="flex flex-col h-full">

@@ -15,3 +15,6 @@ export * from './layout';
 
 // UI 基础组件
 export { Tooltip } from './Tooltip';
+
+// 问题页面客户端组件
+export { ProblemPageClient } from './ProblemPageClient';

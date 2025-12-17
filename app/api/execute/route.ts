@@ -31,7 +31,7 @@ function detectFunctionName(code: string): string | null {
     /function\s+(\w+)\s*\(/,
     /(?:var|let|const)\s+(\w+)\s*=\s*\([^)]*\)\s*=>/,
   ];
-
+  // 乐观创建 + 
   for (const pattern of patterns) {
     const match = code.match(pattern);
     if (match && match[1]) {
