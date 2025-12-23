@@ -3,7 +3,7 @@
  * Defines AI operations and their specific prompts
  */
 
-export type AIActionType = 'chat';
+export type AIActionType = 'chat' | 'analyze-with-chain';
 
 export interface AIPromptConfig {
   type: AIActionType;
@@ -40,9 +40,55 @@ After your analysis, provide an improved version of the code that addresses the 
 Please provide the improved code in a code block with proper syntax highlighting.`;
 
 /**
- * AI Model and request parameters
+ * Available Claude Models Configuration
+ */
+export const CLAUDE_MODELS = {
+  'claude-haiku-4-5-20251001': {
+    name: 'Claude Haiku',
+    description: '快速且高效，适合简单任务',
+    maxTokens: 2048,
+  },
+  'claude-sonnet-4-5-20250514': {
+    name: 'Claude Sonnet',
+    description: '平衡性能和智能，适合大多数任务',
+    maxTokens: 8192,
+  },
+  'claude-opus-4-5-20250514': {
+    name: 'Claude Opus',
+    description: '最智能的模型，适合复杂任务',
+    maxTokens: 8192,
+  },
+  'claude-3-5-sonnet-20241022': {
+    name: 'Claude 3.5 Sonnet',
+    description: '最新版本，代码能力更强',
+    maxTokens: 8192,
+  },
+} as const;
+
+export type ClaudeModelName = keyof typeof CLAUDE_MODELS;
+
+/**
+ * Default model
+ */
+export const DEFAULT_MODEL: ClaudeModelName = 'claude-haiku-4-5-20251001';
+
+/**
+ * Get AI parameters for a specific model
+ */
+export function getAIParams(modelName?: ClaudeModelName) {
+  const model = modelName || DEFAULT_MODEL;
+  const modelConfig = CLAUDE_MODELS[model];
+  return {
+    model,
+    maxTokens: modelConfig.maxTokens,
+  };
+}
+
+/**
+ * AI Model and request parameters (deprecated, use getAIParams instead)
+ * @deprecated Use getAIParams() instead
  */
 export const AI_PARAMS = {
-  model: 'claude-haiku-4-5-20251001',
-  maxTokens: 2048,
+  model: DEFAULT_MODEL,
+  maxTokens: CLAUDE_MODELS[DEFAULT_MODEL].maxTokens,
 };

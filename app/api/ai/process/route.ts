@@ -3,7 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import {
   AIActionType,
   AI_PROMPTS,
-  AI_PARAMS,
+  getAIParams,
+  type ClaudeModelName,
 } from '@/lib/ai-config';
 
 export const runtime = 'nodejs';
@@ -20,6 +21,7 @@ interface AIProcessRequest {
   conversationHistory?: Message[];
   code?: string;
   problemDescription?: string;
+  model?: ClaudeModelName;
 }
 
 /**
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
       conversationHistory = [],
       code,
       problemDescription,
+      model,
     } = body;
 
     // Validate request
@@ -80,10 +83,13 @@ export async function POST(request: NextRequest) {
     ];
     const systemPrompt = buildSystemPrompt(code, problemDescription);
 
+    // Get AI parameters for the specified model (or use default)
+    const aiParams = getAIParams(model);
+
     // Create a readable stream for SSE
     const stream = await client.messages.stream({
-      model: AI_PARAMS.model,
-      max_tokens: AI_PARAMS.maxTokens,
+      model: aiParams.model,
+      max_tokens: aiParams.maxTokens,
       ...(systemPrompt && { system: systemPrompt }),
       messages: messages,
     });

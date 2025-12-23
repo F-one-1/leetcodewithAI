@@ -12,6 +12,14 @@ import {
 import { AIMessageFormatter } from './AIMessageFormatter';
 import { AIClient } from '@/lib/ai-client';
 import { extractModifiedCodeFromAnalysis } from '@/lib/utils';
+import { CLAUDE_MODELS, DEFAULT_MODEL, type ClaudeModelName } from '@/lib/ai-config';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import toast from 'react-hot-toast';
 import type { CodeEditorHandle } from '@/components/code-editor/CodeEditor';
 
@@ -52,6 +60,7 @@ export const AIPanel = ({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAIPowerRunning, setIsAIPowerRunning] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<ClaudeModelName>(DEFAULT_MODEL);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -113,6 +122,7 @@ export const AIPanel = ({
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
         code,
         problemDescription,
+        model: selectedModel,
       });
     } catch (error) {
       toast.error('发送失败');
@@ -144,7 +154,7 @@ export const AIPanel = ({
         },
       ]);
 
-      // 调用 AI Power
+      // 调用 AI Power - 使用 LangChain 链式分析（useChain: true）
       await AIClient.aiPower(code, {
         onData: (chunk) => {
           aiContent += chunk;
@@ -177,6 +187,8 @@ export const AIPanel = ({
         },
       }, {
         problemDescription,
+        useChain: true, // 启用 LangChain 链式分析
+        model: selectedModel,
       });
     } catch (error) {
       toast.error('AI Power 处理失败');
@@ -318,6 +330,31 @@ export const AIPanel = ({
             <Zap size={16} />
             AI Assistant
           </button>
+        </div>
+
+        {/* Model Selector - 宽度为外层 1/2 */}
+        <div className="w-1/2">
+          <Select
+            value={selectedModel}
+            onValueChange={(value) => setSelectedModel(value as ClaudeModelName)}
+            disabled={isLoading || isAIPowerRunning}
+          >
+            <SelectTrigger 
+              className="w-full text-xs"
+              title={CLAUDE_MODELS[selectedModel].description}
+            >
+              <SelectValue>
+                {CLAUDE_MODELS[selectedModel].name}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(CLAUDE_MODELS).map(([key, value]) => (
+                <SelectItem key={key} value={key} title={value.description}>
+                  {value.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex gap-2">

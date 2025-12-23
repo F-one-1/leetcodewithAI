@@ -6,6 +6,8 @@
  * while maintaining backward compatibility with the original API
  */
 
+import type { ClaudeModelName } from '@/lib/ai-config';
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -59,6 +61,7 @@ export class AIClient {
       conversationHistory?: Message[];
       code?: string;
       problemDescription?: string;
+      model?: ClaudeModelName;
     }
   ): Promise<void> {
     return this.callAIProcess('chat', callbacks, {
@@ -66,19 +69,29 @@ export class AIClient {
       conversationHistory: options?.conversationHistory || [],
       code: options?.code,
       problemDescription: options?.problemDescription,
+      model: options?.model,
     });
   }
 
   /**
    * AI Power mode - analyze code and return improved version
+   * 使用传统的单次调用方式
    */
   static async aiPower(
     code: string,
     callbacks: StreamCallback,
     options?: {
       problemDescription?: string;
+      useChain?: boolean; // 是否使用 LangChain 链式分析
+      model?: ClaudeModelName;
     }
   ): Promise<void> {
+    // 如果启用链式分析，使用新的 LangChain 端点
+    if (options?.useChain) {
+      return this.aiPowerWithChain(code, callbacks, options);
+    }
+
+    // 原有的单次调用方式
     const { AI_POWER_PROMPT } = await import('@/lib/ai-config');
     
     const message = `${AI_POWER_PROMPT}\n\nCode to analyze:\n\`\`\`javascript\n${code}\n\`\`\``;
@@ -88,7 +101,44 @@ export class AIClient {
       conversationHistory: [],
       code,
       problemDescription: options?.problemDescription,
+      model: options?.model,
     });
+  }
+
+  /**
+   * AI Power mode with LangChain - 使用多步骤链式分析
+   */
+  static async aiPowerWithChain(
+    code: string,
+    callbacks: StreamCallback,
+    options?: {
+      problemDescription?: string;
+      model?: ClaudeModelName;
+    }
+  ): Promise<void> {
+    try {
+      const response = await fetch('/api/ai/analyze-chain', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          problemDescription: options?.problemDescription,
+          model: options?.model,
+          stream: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      await this.handleStream(response, callbacks);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      callbacks.onError?.(errorMessage);
+    }
   }
 
   /**
